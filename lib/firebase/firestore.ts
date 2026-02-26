@@ -72,10 +72,9 @@ export async function getProducts(
     query = query.where("inventory.inStock", "==", filters.inStock);
   }
 
-  // Order by trending score and creation date
+  // Order by trending score only (Firestore doesn't support multiple orderBy without composite index)
   query = query
-    .orderBy("metadata.trending_score", "desc")
-    .orderBy("timestamps.createdAt", "desc");
+    .orderBy("metadata.trending_score", "desc");
 
   try {
     const snapshot = await query.get();
@@ -322,7 +321,7 @@ export async function searchProducts(query: string): Promise<Product[]> {
     }
 
     if (snapshot && !snapshot.empty) {
-      return snapshot.docs.map((doc) => {
+      return snapshot.docs.map((doc: any) => {
         const data = doc.data();
         return convertFirestoreData({ id: doc.id, ...data }) as Product;
       });
@@ -334,14 +333,14 @@ export async function searchProducts(query: string): Promise<Product[]> {
       .limit(100)
       .get();
 
-    const products = allSnapshot.docs.map((doc) => {
+    const products = allSnapshot.docs.map((doc: any) => {
       const data = doc.data();
       return convertFirestoreData({ id: doc.id, ...data }) as Product;
     });
 
     // Filter by title/description match in memory
     const searchTerms = lowerQuery.split(" ").filter(Boolean);
-    return products.filter((product) => {
+    return products.filter((product: any) => {
       const title = (product.title || "").toLowerCase();
       const description = (product.description || "").toLowerCase();
       const tags = (product as any).metadata?.search_tags || [];
@@ -576,8 +575,8 @@ export async function getTrendingProducts(
 
     // Sort by trending_score in memory
     return products
-      .filter((p) => (p as any).inventory?.inStock)
-      .sort((a, b) => {
+      .filter((p: any) => p.inventory?.inStock)
+      .sort((a: any, b: any) => {
         const scoreA = (a as any).metadata?.trending_score || 0;
         const scoreB = (b as any).metadata?.trending_score || 0;
         return scoreB - scoreA;

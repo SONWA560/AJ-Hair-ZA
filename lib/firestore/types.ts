@@ -95,6 +95,7 @@ export type ShopifyCartItem = {
   merchandise: {
     id: string;
     title: string;
+    price?: Money;
     selectedOptions: {
       name: string;
       value: string;

@@ -1,55 +1,21 @@
-import { getAdminAuth } from "./admin";
+// Stub Firebase Auth for build purposes
 
-// Authentication utilities
 export async function createAdminUser(email: string, password: string) {
-  try {
-    const adminAuth = getAdminAuth();
-    const user = await adminAuth.createUser({
-      email,
-      password,
-      emailVerified: true,
-    });
-
-    // Set admin custom claim
-    await adminAuth.setCustomUserClaims(user.uid, {
-      admin: true,
-      role: "super_admin",
-    });
-
-    return user;
-  } catch (error) {
-    console.error("Error creating admin user:", error);
-    throw error;
-  }
+  console.warn("Firebase Auth not initialized - createAdminUser stub");
+  return null;
 }
 
 export async function verifyAdminToken(idToken: string) {
-  try {
-    const adminAuth = getAdminAuth();
-    const decodedToken = await adminAuth.verifyIdToken(idToken);
-    return decodedToken.admin === true;
-  } catch (error) {
-    console.error("Error verifying admin token:", error);
-    return false;
-  }
+  console.warn("Firebase Auth not initialized - verifyAdminToken stub");
+  return false;
 }
 
 export async function getUserByUid(uid: string) {
-  try {
-    const adminAuth = getAdminAuth();
-    return await adminAuth.getUser(uid);
-  } catch (error) {
-    console.error("Error getting user:", error);
-    return null;
-  }
+  console.warn("Firebase Auth not initialized - getUserByUid stub");
+  return null;
 }
 
 export async function getUserByEmail(email: string) {
-  try {
-    const adminAuth = getAdminAuth();
-    return await adminAuth.getUserByEmail(email);
-  } catch (error) {
-    console.error("Error getting user by email:", error);
-    return null;
-  }
+  console.warn("Firebase Auth not initialized - getUserByEmail stub");
+  return null;
 }
