@@ -6,13 +6,29 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Fragment, Suspense, useEffect, useState } from "react";
 
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Menu } from "lib/shopify/types";
 import Search, { SearchSkeleton } from "./search";
 
-export default function MobileMenu({ menu }: { menu: Menu[] }) {
+type Collection = {
+  handle: string;
+  title: string;
+  description?: string;
+  path: string;
+};
+
+function useHydrated() {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+  return hydrated;
+}
+
+export default function MobileMenu({ menu }: { menu: Collection[] }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
+  const isHydrated = useHydrated();
+  
   const openMobileMenu = () => setIsOpen(true);
   const closeMobileMenu = () => setIsOpen(false);
 
@@ -29,6 +45,18 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   useEffect(() => {
     setIsOpen(false);
   }, [pathname, searchParams]);
+
+  // Don't render anything until hydrated to avoid hydration mismatch
+  if (!isHydrated) {
+    return (
+      <button
+        aria-label="Open mobile menu"
+        className="flex h-11 w-11 items-center justify-center rounded-md border border-neutral-200 text-black transition-colors md:hidden dark:border-neutral-700 dark:text-white"
+      >
+        <Bars3Icon className="h-4" />
+      </button>
+    );
+  }
 
   return (
     <>
@@ -78,10 +106,10 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                 </div>
                 {menu.length ? (
                   <ul className="flex w-full flex-col">
-                    {menu.map((item: Menu) => (
+                    {menu.map((item) => (
                       <li
                         className="py-2 text-xl text-black transition-colors hover:text-neutral-500 dark:text-white"
-                        key={item.title}
+                        key={item.handle}
                       >
                         <Link
                           href={item.path}

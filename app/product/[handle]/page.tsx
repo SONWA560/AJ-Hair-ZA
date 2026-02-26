@@ -2,13 +2,13 @@ import { GridTileImage } from "components/grid/tile";
 import Footer from "components/layout/footer";
 import { Gallery } from "components/product/gallery";
 import { ProductDescription } from "components/product/product-description";
-import { HIDDEN_PRODUCT_TAG } from "lib/constants";
-import { getProduct, getProductRecommendations } from "lib/shopify";
-import type { Image } from "lib/shopify/types";
+import { getProduct, getTrendingProducts } from "lib/firebase/firestore";
+import type { Product } from "lib/types";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 
 export async function generateMetadata(props: {
   params: Promise<{ handle: string }>;
@@ -18,8 +18,8 @@ export async function generateMetadata(props: {
 
   if (!product) return notFound();
 
-  const { url, width, height, altText: alt } = product.featuredImage || {};
-  const indexable = !product.tags.includes(HIDDEN_PRODUCT_TAG);
+  const { url, width, height, alt: alt } = product.images[0] || {};
+  const indexable = product.inventory.inStock;
 
   return {
     title: product.seo.title || product.title,
@@ -55,20 +55,35 @@ export default async function ProductPage(props: {
 
   if (!product) return notFound();
 
+  // Helper to get collection URL from hair type
+  const getCollectionFromHairType = (hairType?: string): string => {
+    if (!hairType) return "new-arrivals";
+    const map: Record<string, string> = {
+      straight: "straight-hair",
+      wavy: "curly-wavy",
+      body_wave: "curly-wavy",
+      deep_wave: "curly-wavy",
+      water_wave: "curly-wavy",
+      kinky_curly: "kinky-coily",
+      coily: "kinky-coily",
+    };
+    return map[hairType] || "new-arrivals";
+  };
+
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.title,
     description: product.description,
-    image: product.featuredImage.url,
+    image: product.images[0]?.url,
     offers: {
       "@type": "AggregateOffer",
-      availability: product.availableForSale
+      availability: product.inventory.inStock
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
-      priceCurrency: product.priceRange.minVariantPrice.currencyCode,
-      highPrice: product.priceRange.maxVariantPrice.amount,
-      lowPrice: product.priceRange.minVariantPrice.amount,
+      priceCurrency: product.currency,
+      highPrice: product.price,
+      lowPrice: product.price,
     },
   };
 
@@ -81,17 +96,25 @@ export default async function ProductPage(props: {
         }}
       />
       <div className="mx-auto max-w-(--breakpoint-2xl) px-4">
+        <div className="mb-6">
+          <Breadcrumb 
+            items={[
+              { title: product.specifications?.hair_type?.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase()) || "Shop", href: `/search/${getCollectionFromHairType(product.specifications?.hair_type)}` },
+              { title: product.title }
+            ]} 
+          />
+        </div>
         <div className="flex flex-col rounded-lg border border-neutral-200 bg-white p-8 md:p-12 lg:flex-row lg:gap-8 dark:border-neutral-800 dark:bg-black">
           <div className="h-full w-full basis-full lg:basis-4/6">
             <Suspense
               fallback={
-                <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden" />
+                <div className="relative aspect-[4/5] h-full max-h-[700px] w-full overflow-hidden" />
               }
             >
               <Gallery
-                images={product.images.slice(0, 5).map((image: Image) => ({
+                images={product.images.slice(0, 5).map((image: any) => ({
                   src: image.url,
-                  altText: image.altText,
+                  altText: image.alt,
                 }))}
               />
             </Suspense>
@@ -111,7 +134,7 @@ export default async function ProductPage(props: {
 }
 
 async function RelatedProducts({ id }: { id: string }) {
-  const relatedProducts = await getProductRecommendations(id);
+  const relatedProducts = await getTrendingProducts(4);
 
   if (!relatedProducts.length) return null;
 
@@ -119,24 +142,24 @@ async function RelatedProducts({ id }: { id: string }) {
     <div className="py-8">
       <h2 className="mb-4 text-2xl font-bold">Related Products</h2>
       <ul className="flex w-full gap-4 overflow-x-auto pt-1">
-        {relatedProducts.map((product) => (
+        {relatedProducts.map((product: Product) => (
           <li
-            key={product.handle}
+            key={product.id}
             className="aspect-square w-full flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
           >
             <Link
               className="relative h-full w-full"
-              href={`/product/${product.handle}`}
+              href={`/product/${product.seo.handle}`}
               prefetch={true}
             >
               <GridTileImage
                 alt={product.title}
                 label={{
                   title: product.title,
-                  amount: product.priceRange.maxVariantPrice.amount,
-                  currencyCode: product.priceRange.maxVariantPrice.currencyCode,
+                  amount: product.price.toString(),
+                  currencyCode: product.currency,
                 }}
-                src={product.featuredImage?.url}
+                src={product.images[0]?.url || ""}
                 fill
                 sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 100vw"
               />

@@ -1,0 +1,26 @@
+{
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "rtl": false,
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "registries": {
+    "@bundui": "https://bundui.io/r/{name}.json",
+    "@commercn": "https://commercn.com/r/{name}.json",
+    "@ss-blocks": "https://shadcnstudio.com/r/{name}.json"
+  }
+}

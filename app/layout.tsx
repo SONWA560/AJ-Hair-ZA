@@ -1,17 +1,21 @@
 import { CartProvider } from "components/cart/cart-context";
+import { AuthenticatedCartProvider } from "components/cart/authenticated-cart-provider";
 import { Navbar } from "components/layout/navbar";
-import { WelcomeToast } from "components/welcome-toast";
 import { GeistSans } from "geist/font/sans";
-import { getCart } from "lib/shopify";
+import { getCart } from "lib/firebase/firestore";
+import { baseUrl } from "lib/utils";
+import type { Cart } from "lib/types";
 import { ReactNode } from "react";
 import { Toaster } from "sonner";
+import {
+  ClerkProvider,
+} from "@clerk/nextjs";
 import "./globals.css";
-import { baseUrl } from "lib/utils";
 
 const { SITE_NAME } = process.env;
 
 export const metadata = {
-  metadataBase: new URL(baseUrl),
+  metadataBase: new URL(baseUrl()),
   title: {
     default: SITE_NAME!,
     template: `%s | ${SITE_NAME}`,
@@ -27,21 +31,25 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  // Don't await the fetch, pass the Promise to the context provider
-  const cart = getCart();
+  // Initial cart promise (will be replaced by client-side when user auth state is known)
+  const initialCartPromise: Promise<Cart | undefined> = Promise.resolve(undefined);
 
   return (
-    <html lang="en" className={GeistSans.variable}>
-      <body className="bg-neutral-50 text-black selection:bg-teal-300 dark:bg-neutral-900 dark:text-white dark:selection:bg-pink-500 dark:selection:text-white">
-        <CartProvider cartPromise={cart}>
-          <Navbar />
-          <main>
-            {children}
-            <Toaster closeButton />
-            <WelcomeToast />
-          </main>
-        </CartProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={GeistSans.variable}>
+        <body
+          className="bg-neutral-50 text-black selection:bg-teal-300 dark:bg-neutral-900 dark:text-white dark:selection:bg-pink-500 dark:selection:text-white"
+          suppressHydrationWarning
+        >
+          <AuthenticatedCartProvider>
+            <Navbar />
+            <main>
+              {children}
+              <Toaster closeButton />
+            </main>
+          </AuthenticatedCartProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -1,0 +1,45 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    // Product images - publicly readable, admin writable
+    match /products/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // User avatars - owner and admin access
+    match /avatars/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Review images - authenticated users
+    match /reviews/{reviewId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // Admin uploads - admin only
+    match /admin/{allPaths=**} {
+      allow read: if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Temp uploads - authenticated users only (for processing)
+    match /temp/{userId}/{allPaths=**} {
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Auto-cleanup: only allow files younger than 24 hours
+      allow read: if request.time < resource.timeCreated + duration('24h');
+    }
+  }
+}

@@ -3,21 +3,45 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
-    "start": "next start",
     "prettier": "prettier --write --ignore-unknown .",
     "prettier:check": "prettier --check --ignore-unknown .",
-    "test": "pnpm prettier:check"
+    "seed:data": "ts-node scripts/seed-comprehensive.ts",
+    "seed:admin": "ts-node scripts/setup-admin.ts",
+    "seed:all": "npm run seed:admin && npm run seed:data",
+    "export:products": "ts-node scripts/export-products.js",
+    "get:products": "ts-node scripts/get-products.js",
+    "migrate:products": "ts-node scripts/migrate-products.js --batch-size=50 --strategy=priority-based --auto-generate=true --preserve-best=true",
+    "backup:products": "ts-node scripts/backup-products.js"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.37.4",
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
+    "@radix-ui/react-checkbox": "^1.3.3",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-radio-group": "^1.3.8",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-slider": "^1.3.6",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@tanstack/react-table": "^8.21.3",
+    "@types/file-saver": "^2.0.7",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "firebase": "^12.8.0",
+    "firebase-admin": "^13.6.0",
     "geist": "^1.3.1",
+    "lucide-react": "^0.564.0",
     "next": "15.6.0-canary.60",
+    "openai": "^6.17.0",
+    "pexels": "^1.4.0",
+    "radix-ui": "^1.4.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "sonner": "^2.0.1"
+    "recharts": "2.15.4",
+    "sonner": "^2.0.1",
+    "tailwind-merge": "^3.5.0"
   },
+  "type": "module",
   "devDependencies": {
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/postcss": "^4.0.14",
@@ -25,10 +49,13 @@
     "@types/node": "22.13.10",
     "@types/react": "19.0.12",
     "@types/react-dom": "19.0.4",
+    "baseline-browser-mapping": "^2.9.19",
+    "dotenv": "^17.2.3",
     "postcss": "^8.5.3",
     "prettier": "3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^4.0.14",
+    "ts-node": "^10.9.2",
     "typescript": "5.8.2"
   }
 }

@@ -1,7 +1,6 @@
 import Grid from "components/grid";
 import ProductGridItems from "components/layout/product-grid-items";
-import { defaultSort, sorting } from "lib/constants";
-import { getProducts } from "lib/shopify";
+import { getProducts, searchProducts } from "lib/firebase/firestore";
 
 export const metadata = {
   title: "Search",
@@ -12,11 +11,14 @@ export default async function SearchPage(props: {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const searchParams = await props.searchParams;
-  const { sort, q: searchValue } = searchParams as { [key: string]: string };
-  const { sortKey, reverse } =
-    sorting.find((item) => item.slug === sort) || defaultSort;
+  const { q: searchValue } = searchParams as { [key: string]: string };
 
-  const products = await getProducts({ sortKey, reverse, query: searchValue });
+  let products;
+  if (searchValue && searchValue.trim()) {
+    products = await searchProducts(searchValue.trim());
+  } else {
+    products = await getProducts();
+  }
   const resultsText = products.length > 1 ? "results" : "result";
 
   return (

@@ -1,6 +1,6 @@
 import { GridTileImage } from "components/grid/tile";
-import { getCollectionProducts } from "lib/shopify";
-import type { Product } from "lib/shopify/types";
+import { getTrendingProducts } from "lib/firebase/firestore";
+import type { Product } from "lib/types";
 import Link from "next/link";
 
 function ThreeItemGridItem({
@@ -22,11 +22,11 @@ function ThreeItemGridItem({
     >
       <Link
         className="relative block aspect-square h-full w-full"
-        href={`/product/${item.handle}`}
+        href={`/product/${item.seo.handle}`}
         prefetch={true}
       >
         <GridTileImage
-          src={item.featuredImage.url}
+          src={item.images[0]?.url || ""}
           fill
           sizes={
             size === "full"
@@ -37,9 +37,9 @@ function ThreeItemGridItem({
           alt={item.title}
           label={{
             position: size === "full" ? "center" : "bottom",
-            title: item.title as string,
-            amount: item.priceRange.maxVariantPrice.amount,
-            currencyCode: item.priceRange.maxVariantPrice.currencyCode,
+            title: item.title,
+            amount: item.price.toString(),
+            currencyCode: item.currency,
           }}
         />
       </Link>
@@ -48,10 +48,8 @@ function ThreeItemGridItem({
 }
 
 export async function ThreeItemGrid() {
-  // Collections that start with `hidden-*` are hidden from the search page.
-  const homepageItems = await getCollectionProducts({
-    collection: "hidden-homepage-featured-items",
-  });
+  // Get trending products for homepage
+  const homepageItems = await getTrendingProducts(3);
 
   if (!homepageItems[0] || !homepageItems[1] || !homepageItems[2]) return null;
 

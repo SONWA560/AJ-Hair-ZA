@@ -1,17 +1,16 @@
 "use client";
 
-import type {
-  Cart,
-  CartItem,
-  Product,
-  ProductVariant,
-} from "lib/shopify/types";
-import React, {
+import type { Cart, CartItem, Product } from "lib/types";
+import { getCart as getCartFromFirestore, addToCart as addToCartToFirestore } from "lib/cart-client";
+import {
   createContext,
   use,
   useContext,
   useMemo,
   useOptimistic,
+  useCallback,
+  useEffect,
+  startTransition,
 } from "react";
 
 type UpdateType = "plus" | "minus" | "delete";
@@ -19,21 +18,32 @@ type UpdateType = "plus" | "minus" | "delete";
 type CartAction =
   | {
       type: "UPDATE_ITEM";
-      payload: { merchandiseId: string; updateType: UpdateType };
+      payload: { itemId: string; updateType: UpdateType };
     }
   | {
       type: "ADD_ITEM";
-      payload: { variant: ProductVariant; product: Product };
+      payload: { product: Product; variant?: any };
+    }
+  | {
+      type: "SET_CART";
+      payload: Cart;
+    }
+  | {
+      type: "CLEAR_CART";
     };
 
 type CartContextType = {
-  cartPromise: Promise<Cart | undefined>;
+  cart: Cart | undefined;
+  userId: string;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-function calculateItemCost(quantity: number, price: string): string {
-  return (Number(price) * quantity).toString();
+const LOCAL_STORAGE_KEY = "shara-commerce-cart";
+const PENDING_CART_KEY = "shara-pending-cart";
+
+function calculateItemCost(quantity: number, price: number): number {
+  return price * quantity;
 }
 
 function updateCartItem(
@@ -46,87 +56,59 @@ function updateCartItem(
     updateType === "plus" ? item.quantity + 1 : item.quantity - 1;
   if (newQuantity === 0) return null;
 
-  const singleItemAmount = Number(item.cost.totalAmount.amount) / item.quantity;
-  const newTotalAmount = calculateItemCost(
-    newQuantity,
-    singleItemAmount.toString(),
-  );
-
   return {
     ...item,
     quantity: newQuantity,
-    cost: {
-      ...item.cost,
-      totalAmount: {
-        ...item.cost.totalAmount,
-        amount: newTotalAmount,
-      },
-    },
   };
 }
 
 function createOrUpdateCartItem(
   existingItem: CartItem | undefined,
-  variant: ProductVariant,
   product: Product,
+  variant?: any,
 ): CartItem {
   const quantity = existingItem ? existingItem.quantity + 1 : 1;
-  const totalAmount = calculateItemCost(quantity, variant.price.amount);
+  const totalAmount = calculateItemCost(quantity, product.price);
 
   return {
-    id: existingItem?.id,
+    id: existingItem?.id || Math.random().toString(36).substring(2, 9),
+    productId: product.id,
+    title: product.title,
+    price: product.price,
     quantity,
-    cost: {
-      totalAmount: {
-        amount: totalAmount,
-        currencyCode: variant.price.currencyCode,
-      },
-    },
-    merchandise: {
-      id: variant.id,
-      title: variant.title,
-      selectedOptions: variant.selectedOptions,
-      product: {
-        id: product.id,
-        handle: product.handle,
-        title: product.title,
-        featuredImage: product.featuredImage,
-      },
+    image: product.images[0]?.url || "",
+    variant: variant || {
+      hair_type: product.specifications?.hair_type,
+      length: product.specifications?.length,
+      color: product.specifications?.color,
     },
   };
 }
 
-function updateCartTotals(
-  lines: CartItem[],
-): Pick<Cart, "totalQuantity" | "cost"> {
+function updateCartTotals(lines: CartItem[]): {
+  totalQuantity: number;
+  total: number;
+} {
   const totalQuantity = lines.reduce((sum, item) => sum + item.quantity, 0);
   const totalAmount = lines.reduce(
-    (sum, item) => sum + Number(item.cost.totalAmount.amount),
+    (sum, item) => sum + calculateItemCost(item.quantity, item.price),
     0,
   );
-  const currencyCode = lines[0]?.cost.totalAmount.currencyCode ?? "USD";
 
   return {
     totalQuantity,
-    cost: {
-      subtotalAmount: { amount: totalAmount.toString(), currencyCode },
-      totalAmount: { amount: totalAmount.toString(), currencyCode },
-      totalTaxAmount: { amount: "0", currencyCode },
-    },
+    total: totalAmount,
   };
 }
 
-function createEmptyCart(): Cart {
+function createEmptyCart(userId?: string): Cart {
   return {
-    id: undefined,
-    checkoutUrl: "",
-    totalQuantity: 0,
-    lines: [],
-    cost: {
-      subtotalAmount: { amount: "0", currencyCode: "USD" },
-      totalAmount: { amount: "0", currencyCode: "USD" },
-      totalTaxAmount: { amount: "0", currencyCode: "USD" },
-    },
+    id: userId || "guest",
+    userId: userId || "guest",
+    items: [],
+    total: 0,
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 
@@ -134,55 +116,49 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
   const currentCart = state || createEmptyCart();
 
   switch (action.type) {
+    case "SET_CART":
+      return action.payload;
+    
+    case "CLEAR_CART":
+      return createEmptyCart(currentCart.userId);
+
     case "UPDATE_ITEM": {
-      const { merchandiseId, updateType } = action.payload;
-      const updatedLines = currentCart.lines
+      const { itemId, updateType } = action.payload;
+      const updatedItems = currentCart.items
         .map((item) =>
-          item.merchandise.id === merchandiseId
-            ? updateCartItem(item, updateType)
-            : item,
+          item.id === itemId ? updateCartItem(item, updateType) : item,
         )
         .filter(Boolean) as CartItem[];
 
-      if (updatedLines.length === 0) {
-        return {
-          ...currentCart,
-          lines: [],
-          totalQuantity: 0,
-          cost: {
-            ...currentCart.cost,
-            totalAmount: { ...currentCart.cost.totalAmount, amount: "0" },
-          },
-        };
-      }
+      const { totalQuantity, total } = updateCartTotals(updatedItems);
 
       return {
         ...currentCart,
-        ...updateCartTotals(updatedLines),
-        lines: updatedLines,
+        items: updatedItems,
+        total,
+        updatedAt: new Date(),
       };
     }
     case "ADD_ITEM": {
-      const { variant, product } = action.payload;
-      const existingItem = currentCart.lines.find(
-        (item) => item.merchandise.id === variant.id,
+      const { product, variant } = action.payload;
+      const existingItem = currentCart.items.find(
+        (item) => item.productId === product.id,
       );
-      const updatedItem = createOrUpdateCartItem(
-        existingItem,
-        variant,
-        product,
-      );
+      const updatedItem = createOrUpdateCartItem(existingItem, product, variant);
 
-      const updatedLines = existingItem
-        ? currentCart.lines.map((item) =>
-            item.merchandise.id === variant.id ? updatedItem : item,
+      const updatedItems = existingItem
+        ? currentCart.items.map((item) =>
+            item.productId === product.id ? updatedItem : item,
           )
-        : [...currentCart.lines, updatedItem];
+        : [...currentCart.items, updatedItem];
+
+      const { totalQuantity, total } = updateCartTotals(updatedItems);
 
       return {
         ...currentCart,
-        ...updateCartTotals(updatedLines),
-        lines: updatedLines,
+        items: updatedItems,
+        total,
+        updatedAt: new Date(),
       };
     }
     default:
@@ -190,15 +166,76 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
   }
 }
 
+// Save cart to localStorage
+function saveCartToLocalStorage(cart: Cart): void {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(cart));
+    } catch (e) {
+      console.error("Failed to save cart to localStorage:", e);
+    }
+  }
+}
+
+// Load cart from localStorage
+function loadCartFromLocalStorage(): Cart | null {
+  if (typeof window !== "undefined") {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error("Failed to load cart from localStorage:", e);
+    }
+  }
+  return null;
+}
+
+// Save pending cart item (for guest users who try to add to cart)
+export function savePendingCartItem(item: { product: Product; variant?: any; quantity: number }): void {
+  if (typeof window !== "undefined") {
+    try {
+      const pending = JSON.parse(localStorage.getItem(PENDING_CART_KEY) || "[]");
+      pending.push(item);
+      localStorage.setItem(PENDING_CART_KEY, JSON.stringify(pending));
+    } catch (e) {
+      console.error("Failed to save pending cart item:", e);
+    }
+  }
+}
+
+// Get and clear pending cart items
+export function getAndClearPendingCartItems(): { product: Product; variant?: any; quantity: number }[] {
+  if (typeof window !== "undefined") {
+    try {
+      const pending = JSON.parse(localStorage.getItem(PENDING_CART_KEY) || "[]");
+      localStorage.removeItem(PENDING_CART_KEY);
+      return pending;
+    } catch (e) {
+      console.error("Failed to get pending cart items:", e);
+    }
+  }
+  return [];
+}
+
 export function CartProvider({
   children,
-  cartPromise,
+  cart,
+  userId,
 }: {
   children: React.ReactNode;
-  cartPromise: Promise<Cart | undefined>;
+  cart: Cart | undefined;
+  userId: string;
 }) {
+  // Ensure we always have a valid context value
+  const contextValue = useMemo(
+    () => ({ cart, userId }),
+    [cart, userId]
+  );
+
   return (
-    <CartContext.Provider value={{ cartPromise }}>
+    <CartContext.Provider value={contextValue}>
       {children}
     </CartContext.Provider>
   );
@@ -206,33 +243,127 @@ export function CartProvider({
 
 export function useCart() {
   const context = useContext(CartContext);
-  if (context === undefined) {
-    throw new Error("useCart must be used within a CartProvider");
-  }
+  
+  // Create a fallback cart
+  const fallbackCart: Cart = {
+    id: "fallback",
+    userId: "fallback",
+    items: [],
+    total: 0,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 
-  const initialCart = use(context.cartPromise);
+  // Determine cart and userId from context, or use fallback
+  let cart = fallbackCart;
+  let userId = "fallback";
+  let isValidContext = false;
+
+  if (context !== undefined && context.cart !== undefined && context.userId !== undefined) {
+    cart = context.cart;
+    userId = context.userId;
+    isValidContext = true;
+  }
+  
+  // Always call hooks in the same order
   const [optimisticCart, updateOptimisticCart] = useOptimistic(
-    initialCart,
+    cart,
     cartReducer,
   );
 
-  const updateCartItem = (merchandiseId: string, updateType: UpdateType) => {
-    updateOptimisticCart({
-      type: "UPDATE_ITEM",
-      payload: { merchandiseId, updateType },
-    });
-  };
+  useEffect(() => {
+    if (typeof window !== "undefined" && optimisticCart) {
+      saveCartToLocalStorage(optimisticCart);
+    }
+  }, [optimisticCart]);
 
-  const addCartItem = (variant: ProductVariant, product: Product) => {
-    updateOptimisticCart({ type: "ADD_ITEM", payload: { variant, product } });
-  };
+  // Ensure we always have a valid cart with items array
+  const effectiveCart = optimisticCart || cart || fallbackCart;
+
+  // Define all callbacks - they can use fallback implementations if not valid
+  const noop = useCallback(() => {}, []);
+  
+  const syncWithFirestore = useCallback(async () => {
+    if (!isValidContext) return;
+    try {
+      const freshCart = await getCartFromFirestore(userId);
+      if (freshCart) {
+        updateOptimisticCart({
+          type: "SET_CART",
+          payload: freshCart,
+        });
+        saveCartToLocalStorage(freshCart);
+      }
+    } catch (e) {
+      console.error("Failed to sync cart with Firestore:", e);
+    }
+  }, [isValidContext, userId, updateOptimisticCart]);
+
+  const updateCartItem = useCallback(
+    (itemId: string, updateType: UpdateType) => {
+      if (!isValidContext) return;
+      startTransition(() => {
+        updateOptimisticCart({
+          type: "UPDATE_ITEM",
+          payload: { itemId, updateType },
+        });
+      });
+      try {
+        addToCartToFirestore(userId, []).catch(e => console.error("Failed to update cart item:", e));
+      } catch (e) {
+        console.error("Failed to update cart item:", e);
+      }
+    },
+    [isValidContext, updateOptimisticCart, userId],
+  );
+
+  const addCartItem = useCallback(
+    (product: Product, variant?: any) => {
+      if (!isValidContext) return;
+      startTransition(() => {
+        updateOptimisticCart({
+          type: "ADD_ITEM",
+          payload: { product, variant },
+        });
+      });
+      const currentCart = effectiveCart || createEmptyCart(userId);
+      saveCartToLocalStorage(currentCart);
+    },
+    [isValidContext, updateOptimisticCart, effectiveCart, userId],
+  );
+
+  const setCart = useCallback(
+    (cart: Cart) => {
+      if (!isValidContext) return;
+      updateOptimisticCart({
+        type: "SET_CART",
+        payload: cart,
+      });
+      saveCartToLocalStorage(cart);
+    },
+    [isValidContext, updateOptimisticCart],
+  );
+
+  const clearCart = useCallback(() => {
+    if (!isValidContext) return;
+    updateOptimisticCart({
+      type: "CLEAR_CART",
+    });
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+    }
+  }, [isValidContext, updateOptimisticCart]);
 
   return useMemo(
     () => ({
-      cart: optimisticCart,
+      cart: effectiveCart,
       updateCartItem,
       addCartItem,
+      setCart,
+      clearCart,
+      syncWithFirestore,
+      userId,
     }),
-    [optimisticCart],
+    [effectiveCart, updateCartItem, addCartItem, setCart, clearCart, syncWithFirestore, userId],
   );
 }

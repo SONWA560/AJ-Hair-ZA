@@ -1,0 +1,47 @@
+[
+  {
+    "id": "test-1",
+    "title": "Test Product 1",
+    "seo": {
+      "handle": "test-product-1",
+      "title": "",
+      "description": "",
+      "keywords": []
+    },
+    "specifications": {
+      "hair_type": "kinky_curly",
+      "lace_type": "13x4",
+      "density": "150%",
+      "hair_grade": "12A",
+      "length": "14in",
+      "color": "natural_black",
+      "texture": "curly"
+    },
+    "metadata": {
+      "trending_score": 9,
+      "search_tags": [
+        "kinky_curly",
+        "test"
+      ],
+      "suitable_face_shapes": [
+        "round"
+      ],
+      "maintenance_level": "low",
+      "featured": true,
+      "new_arrival": false
+    },
+    "inventory": {
+      "inStock": true,
+      "quantity": 25,
+      "reserved": 0
+    },
+    "images": [
+      {
+        "url": "https://example.com/test1.jpg",
+        "alt": "Test 1",
+        "width": 800,
+        "height": 600
+      }
+    ]
+  }
+]

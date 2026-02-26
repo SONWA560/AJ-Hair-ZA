@@ -1,51 +1,35 @@
-import { ReadonlyURLSearchParams } from "next/navigation";
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
 
-export const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-  ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-  : "http://localhost:3000";
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 
-export const createUrl = (
-  pathname: string,
-  params: URLSearchParams | ReadonlyURLSearchParams,
-) => {
+export function createUrl(pathname: string, params: URLSearchParams): string {
   const paramsString = params.toString();
   const queryString = `${paramsString.length ? "?" : ""}${paramsString}`;
 
   return `${pathname}${queryString}`;
-};
+}
 
-export const ensureStartsWith = (stringToCheck: string, startsWith: string) =>
-  stringToCheck.startsWith(startsWith)
-    ? stringToCheck
-    : `${startsWith}${stringToCheck}`;
-
-export const validateEnvironmentVariables = () => {
-  const requiredEnvironmentVariables = [
-    "SHOPIFY_STORE_DOMAIN",
-    "SHOPIFY_STOREFRONT_ACCESS_TOKEN",
-  ];
-  const missingEnvironmentVariables = [] as string[];
-
-  requiredEnvironmentVariables.forEach((envVar) => {
-    if (!process.env[envVar]) {
-      missingEnvironmentVariables.push(envVar);
-    }
-  });
-
-  if (missingEnvironmentVariables.length) {
-    throw new Error(
-      `The following environment variables are missing. Your site will not work without them. Read more: https://vercel.com/docs/integrations/shopify#configure-environment-variables\n\n${missingEnvironmentVariables.join(
-        "\n",
-      )}\n`,
-    );
+export function ensureStartsWith(stringToCheck: string, startsWith: string): string {
+  if (!stringToCheck.startsWith(startsWith)) {
+    return `${startsWith}${stringToCheck}`;
   }
 
-  if (
-    process.env.SHOPIFY_STORE_DOMAIN?.includes("[") ||
-    process.env.SHOPIFY_STORE_DOMAIN?.includes("]")
-  ) {
+  return stringToCheck;
+}
+
+export function baseUrl(): string {
+  return process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+}
+
+export function validateEnvironmentVariables() {
+  if (process.env.NEXT_PUBLIC_BASE_URL) return;
+
+  if (process.env.NODE_ENV === "production") {
     throw new Error(
-      "Your `SHOPIFY_STORE_DOMAIN` environment variable includes brackets (ie. `[` and / or `]`). Your site will not work with them there. Please remove them.",
+      "NEXT_PUBLIC_BASE_URL environment variable is not set. Please set it to your production URL."
     );
   }
-};
+}

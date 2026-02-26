@@ -1,52 +1,62 @@
-import { getCollection, getCollectionProducts } from "lib/shopify";
+import { getProductsByHairType } from "lib/firebase/firestore";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import Grid from "components/grid";
-import ProductGridItems from "components/layout/product-grid-items";
-import { defaultSort, sorting } from "lib/constants";
+import { CollectionSearchClient } from "@/components/collection-search-client";
+
+const collectionHairTypeMap: Record<string, string[]> = {
+  "straight-hair": ["straight"],
+  "curly-wavy": ["wavy", "body_wave", "deep_wave", "water_wave"],
+  "kinky-coily": ["kinky_curly", "coily"],
+  "new-arrivals": [],
+};
 
 export async function generateMetadata(props: {
   params: Promise<{ collection: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
-  const collection = await getCollection(params.collection);
+  const collection = params.collection;
 
-  if (!collection) return notFound();
+  const title = collection
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 
   return {
-    title: collection.seo?.title || collection.title,
-    description:
-      collection.seo?.description ||
-      collection.description ||
-      `${collection.title} products`,
+    title: `${title} Collection`,
+    description: `Browse our ${title} wig collection with premium quality hair products.`,
   };
 }
 
 export default async function CategoryPage(props: {
   params: Promise<{ collection: string }>;
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const searchParams = await props.searchParams;
   const params = await props.params;
-  const { sort } = searchParams as { [key: string]: string };
-  const { sortKey, reverse } =
-    sorting.find((item) => item.slug === sort) || defaultSort;
-  const products = await getCollectionProducts({
-    collection: params.collection,
-    sortKey,
-    reverse,
-  });
+  const collection = params.collection;
+
+  let products: any[] = [];
+  
+  const hairTypes = collectionHairTypeMap[collection];
+  
+  try {
+    if (collection === "new-arrivals") {
+      // For new arrivals, get all products sorted by newest
+      const { getProducts } = await import("lib/firebase/firestore");
+      products = await getProducts({ sortBy: "newest" });
+    } else if (hairTypes) {
+      products = await getProductsByHairType(collection);
+    } else {
+      products = await getProductsByHairType(collection);
+    }
+  } catch (error) {
+    console.error("Error fetching collection products:", error);
+    products = [];
+  }
 
   return (
-    <section>
-      {products.length === 0 ? (
-        <p className="py-3 text-lg">{`No products found in this collection`}</p>
-      ) : (
-        <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          <ProductGridItems products={products} />
-        </Grid>
-      )}
-    </section>
+    <CollectionSearchClient 
+      initialProducts={products} 
+      collection={collection} 
+    />
   );
 }

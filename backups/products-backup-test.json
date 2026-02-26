@@ -1,0 +1,139 @@
+{
+  "timestamp": "2026-02-12T11:20:12.368Z",
+  "version": "1.0.0",
+  "totalProducts": 2,
+  "processedProducts": 2,
+  "skippedProducts": 0,
+  "errors": [],
+  "assets": {
+    "images": {
+      "total": 2,
+      "unique": {},
+      "duplicates": {},
+      "inaccessible": 0,
+      "broken": 0,
+      "moved": 0
+    }
+  },
+  "migrationPlan": [
+    {
+      "handle": "mock-product-1",
+      "originalCount": 1,
+      "preserveBest": {
+        "id": "mock-1",
+        "title": "Mock Product 1",
+        "seo": {
+          "handle": "mock-product-1",
+          "title": "",
+          "description": "",
+          "keywords": []
+        },
+        "specifications": {
+          "hair_type": "kinky_curly",
+          "lace_type": "13x4",
+          "density": "150%",
+          "hair_grade": "12A",
+          "length": "14in",
+          "color": "natural_black",
+          "texture": "curly"
+        },
+        "metadata": {
+          "trending_score": 9.5,
+          "search_tags": [
+            "kinky_curly",
+            "test"
+          ],
+          "suitable_face_shapes": [
+            "round"
+          ],
+          "maintenance_level": "low",
+          "featured": true,
+          "new_arrival": false
+        },
+        "inventory": {
+          "inStock": true,
+          "quantity": 25,
+          "reserved": 0
+        },
+        "images": [
+          {
+            "url": "https://example.com/mock-image1.jpg",
+            "alt": "Mock image 1",
+            "width": 800,
+            "height": 600
+          }
+        ],
+        "ratings": {
+          "average": 4.5,
+          "count": 15
+        },
+        "timestamps": {
+          "createdAt": "2024-01-01T10:00:00.000Z",
+          "updatedAt": "2024-01-15T10:00:00.000Z"
+        }
+      },
+      "migrateOthers": [],
+      "newHandles": []
+    },
+    {
+      "handle": "mock-product-2",
+      "originalCount": 1,
+      "preserveBest": {
+        "id": "mock-2",
+        "title": "Mock Product 2",
+        "seo": {
+          "handle": "mock-product-2",
+          "title": "",
+          "description": "",
+          "keywords": []
+        },
+        "specifications": {
+          "hair_type": "straight",
+          "lace_type": "13x6",
+          "density": "180%",
+          "hair_grade": "10A",
+          "length": "16in",
+          "color": "blonde",
+          "texture": "silky"
+        },
+        "metadata": {
+          "trending_score": 8.8,
+          "search_tags": [
+            "straight",
+            "blonde",
+            "test"
+          ],
+          "suitable_face_shapes": [
+            "oval"
+          ],
+          "maintenance_level": "medium",
+          "featured": false,
+          "new_arrival": true
+        },
+        "inventory": {
+          "inStock": true,
+          "quantity": 12,
+          "reserved": 0
+        },
+        "images": [
+          {
+            "url": "https://example.com/mock-image2.jpg",
+            "alt": "Mock image 2",
+            "width": 800,
+            "height": 600
+          }
+        ],
+        "ratings": {
+          "average": 3.9,
+          "count": 8
+        },
+        "timestamps": {
+          "createdAt": "2024-01-02T12:00:00.000Z",
+          "updatedAt": "2024-01-10T12:00:00.000Z"
+        }
+      },
+      "migrateOthers": [],
+      "newHandles": []
+    }
+  ]
+}

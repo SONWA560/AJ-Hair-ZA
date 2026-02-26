@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Products - publicly readable, admin writable
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Carts - user-restricted
+    match /carts/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // Orders - user and admin access
+    match /orders/{orderId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+    }
+
+    // Users - owner and admin access
+    match /users/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // Admin profiles - admin only
+    match /adminProfiles/{adminId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Inventory - admin only
+    match /inventory/{documentId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Search logs - write for anyone, read for admin
+    match /searchLogs/{logId} {
+      allow create: if isAuthenticated();
+      allow read: if isAdmin();
+    }
+
+    // Analytics - admin only
+    match /analytics/{documentId} {
+      allow read, write: if isAdmin();
+    }
+
+    // Reviews - authenticated users can read/write
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isOwner(resource.data.userId) || isAdmin();
+      allow delete: if isOwner(resource.data.userId) || isAdmin();
+    }
+
+    // Newsletter subscriptions - public read/write
+    match /newsletter/{subscriptionId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}
