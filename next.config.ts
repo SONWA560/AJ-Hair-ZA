@@ -1,6 +1,4 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+export default {
   experimental: {
     ppr: true,
     inlineCss: true,
@@ -36,6 +34,21 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  turbopack: {
+    // Empty turbopack config to silence the error
+  },
+  webpack: (config: any, { isServer }: { isServer: boolean }) => {
+    if (!isServer) {
+      // Exclude Firebase Admin SDK from client-side bundle
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        child_process: false,
+        "firebase-admin": false,
+      };
+    }
+    return config;
+  },
 };
-
-export default nextConfig;

@@ -6,34 +6,16 @@ export async function GET(
   context: { params: Promise<{ cartId: string }> },
 ) {
   const params = await context.params;
-  const cartId = params.cartId;
-  
   try {
+    const cartId = params.cartId;
     const result = await getShopifyCart(cartId);
+
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error fetching cart:", error);
-    return NextResponse.json({
-      data: {
-        cart: {
-          id: cartId,
-          checkoutUrl: "/checkout",
-          cost: {
-            subtotalAmount: { amount: "0.00", currencyCode: "ZAR" },
-            totalAmount: { amount: "0.00", currencyCode: "ZAR" },
-            totalTaxAmount: { amount: "0.00", currencyCode: "ZAR" },
-          },
-          lines: {
-            edges: [],
-            pageInfo: {
-              hasNextPage: false,
-              hasPreviousPage: false,
-            },
-          },
-          totalQuantity: 0,
-        },
-      },
-      variables: { cartId },
-    });
+    return NextResponse.json(
+      { error: "Failed to fetch cart" },
+      { status: 500 },
+    );
   }
 }

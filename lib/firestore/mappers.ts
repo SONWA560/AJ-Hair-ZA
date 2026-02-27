@@ -150,10 +150,6 @@ export function mapFirestoreToShopifyCart(
         merchandise: {
           id: item.productId,
           title: item.title,
-          price: {
-            amount: item.price.toString(),
-            currencyCode: product.currency,
-          },
           selectedOptions: [
             {
               name: "Hair Type",

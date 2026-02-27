@@ -1,46 +1,31 @@
-import { initializeApp, getApps, FirebaseApp, getApp } from "firebase/app";
+import { initializeApp, getApps, FirebaseApp } from "firebase/app";
 import { getFirestore, Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-function getFirebaseApp(): FirebaseApp | undefined {
+function initFirebase(): { app: FirebaseApp | undefined; firestore: Firestore | undefined } {
   if (typeof window === "undefined") {
-    return undefined;
+    return { app: undefined, firestore: undefined };
   }
   
-  try {
-    if (!getApps().length) {
-      return initializeApp(firebaseConfig);
-    } else {
-      return getApp();
-    }
-  } catch (e) {
-    console.error("Failed to initialize Firebase app:", e);
-    return undefined;
+  let app: FirebaseApp;
+  if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
+  } else {
+    app = getApps()[0] as FirebaseApp;
   }
+  const firestore = getFirestore(app);
+  return { app, firestore };
 }
 
-function getFirebaseDb(): Firestore | undefined {
-  if (typeof window === "undefined") {
-    return undefined;
-  }
-  
-  try {
-    const app = getFirebaseApp();
-    if (!app) return undefined;
-    return getFirestore(app);
-  } catch (e) {
-    console.error("Failed to get Firestore:", e);
-    return undefined;
-  }
-}
-
-export const db = getFirebaseDb();
-export default getFirebaseApp;
+const firebase = initFirebase();
+export const app = firebase.app;
+export const db = firebase.firestore;
+export default app;
