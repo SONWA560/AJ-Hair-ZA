@@ -1,15 +1,19 @@
-import { getTrendingProducts } from "lib/firebase/firestore";
 import Link from "next/link";
 import { GridTileImage } from "./grid/tile";
 import type { Product } from "lib/types";
 
+async function fetchTrending(limit: number = 6) {
+  const res = await fetch(`/api/products?action=trending&limit=${limit}`, { cache: 'no-store' });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.products || [];
+}
+
 export async function Carousel() {
-  // Get trending products for carousel
-  const products = await getTrendingProducts(6);
+  const products = await fetchTrending(6);
 
   if (!products?.length) return null;
 
-  // Purposefully duplicating products to make the carousel loop and not run out of products on wide screens.
   const carouselProducts = [...products, ...products, ...products];
 
   return (

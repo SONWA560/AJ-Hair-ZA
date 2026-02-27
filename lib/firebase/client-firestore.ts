@@ -115,8 +115,8 @@ export async function addToCart(
   
   await setDoc(cartRef, {
     ...cart,
-    createdAt: cart.createdAt.toISOString(),
-    updatedAt: cart.updatedAt.toISOString(),
+    createdAt: cart.createdAt?.toISOString() || new Date().toISOString(),
+    updatedAt: cart.updatedAt?.toISOString() || new Date().toISOString(),
   });
   
   return cart;
@@ -154,8 +154,8 @@ export async function removeFromCart(
   
   await setDoc(cartRef, {
     ...cart,
-    createdAt: cart.createdAt.toISOString(),
-    updatedAt: cart.updatedAt.toISOString(),
+    createdAt: cart.createdAt?.toISOString() || new Date().toISOString(),
+    updatedAt: cart.updatedAt?.toISOString() || new Date().toISOString(),
   });
   
   return cart;
@@ -202,8 +202,8 @@ export async function updateCartQuantity(
   
   await setDoc(cartRef, {
     ...cart,
-    createdAt: cart.createdAt.toISOString(),
-    updatedAt: cart.updatedAt.toISOString(),
+    createdAt: cart.createdAt?.toISOString() || new Date().toISOString(),
+    updatedAt: cart.updatedAt?.toISOString() || new Date().toISOString(),
   });
   
   return cart;

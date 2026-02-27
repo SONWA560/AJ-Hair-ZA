@@ -4,11 +4,17 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Grid from "components/grid";
 import ProductGridItems from "components/layout/product-grid-items";
-import { getProducts } from "lib/firebase/firestore";
 import { Loader2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import type { Product } from "lib/types";
+
+async function fetchProducts() {
+  const res = await fetch('/api/products?action=all', { cache: 'no-store' });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.products || [];
+}
 
 export default function SearchPage() {
   const router = useRouter();
@@ -22,11 +28,11 @@ export default function SearchPage() {
   useEffect(() => {
     async function loadProducts() {
       setIsLoading(true);
-      const data = await getProducts();
+      const data = await fetchProducts();
       
       // Simple client-side filter
       if (searchQuery) {
-        const filtered = data.filter(p => 
+        const filtered = (data as Product[]).filter((p: Product) => 
           p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.specifications?.hair_type?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.specifications?.color?.toLowerCase().includes(searchQuery.toLowerCase())

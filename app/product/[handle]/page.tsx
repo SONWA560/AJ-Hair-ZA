@@ -2,7 +2,6 @@ import { GridTileImage } from "components/grid/tile";
 import Footer from "components/layout/footer";
 import { Gallery } from "components/product/gallery";
 import { ProductDescription } from "components/product/product-description";
-import { getProduct, getTrendingProducts } from "lib/firebase/firestore";
 import type { Product } from "lib/types";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -10,11 +9,25 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 
+async function fetchProduct(handle: string) {
+  const res = await fetch(`/api/products?action=product&handle=${handle}`, { cache: 'no-store' });
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.product;
+}
+
+async function fetchTrending(limit: number = 4) {
+  const res = await fetch(`/api/products?action=trending&limit=${limit}`, { cache: 'no-store' });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.products || [];
+}
+
 export async function generateMetadata(props: {
   params: Promise<{ handle: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
-  const product = await getProduct(params.handle);
+  const product = await fetchProduct(params.handle);
 
   if (!product) return notFound();
 
@@ -51,11 +64,10 @@ export default async function ProductPage(props: {
   params: Promise<{ handle: string }>;
 }) {
   const params = await props.params;
-  const product = await getProduct(params.handle);
+  const product = await fetchProduct(params.handle);
 
   if (!product) return notFound();
 
-  // Helper to get collection URL from hair type
   const getCollectionFromHairType = (hairType?: string): string => {
     if (!hairType) return "new-arrivals";
     const map: Record<string, string> = {
@@ -99,7 +111,7 @@ export default async function ProductPage(props: {
         <div className="mb-6">
           <Breadcrumb 
             items={[
-              { title: product.specifications?.hair_type?.replace("_", " ").replace(/\b\w/g, l => l.toUpperCase()) || "Shop", href: `/search/${getCollectionFromHairType(product.specifications?.hair_type)}` },
+              { title: product.specifications?.hair_type?.replace("_", " ").replace(/\b\w/g, (l: string) => l.toUpperCase()) || "Shop", href: `/search/${getCollectionFromHairType(product.specifications?.hair_type)}` },
               { title: product.title }
             ]} 
           />
@@ -134,7 +146,7 @@ export default async function ProductPage(props: {
 }
 
 async function RelatedProducts({ id }: { id: string }) {
-  const relatedProducts = await getTrendingProducts(4);
+  const relatedProducts = await fetchTrending(4);
 
   if (!relatedProducts.length) return null;
 

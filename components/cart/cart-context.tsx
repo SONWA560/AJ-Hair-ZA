@@ -32,8 +32,8 @@ function createEmptyCart(userId?: string): Cart {
     userId: userId || "guest",
     items: [],
     total: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: undefined,
+    updatedAt: undefined,
   };
 }
 

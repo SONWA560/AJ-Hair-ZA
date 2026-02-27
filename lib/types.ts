@@ -99,8 +99,8 @@ export interface Cart {
   userId: string;
   items: CartItem[];
   total: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface CartItem {

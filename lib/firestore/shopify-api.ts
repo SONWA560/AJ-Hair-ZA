@@ -17,29 +17,32 @@ import {
   mapFirestoreToShopifyCart,
   mapFirestoreToShopifyCollection,
 } from "./mappers";
-import {
-  getProducts,
-  getProduct,
-  getCart,
-  addToCart as addToFirestoreCart,
-  removeFromCart as removeFromFirestoreCart,
-  updateCartQuantity as updateFirestoreCartQuantity,
-  searchProducts,
-  getTrendingProducts,
-} from "../firebase/firestore";
 import { ProductFilters } from "../types";
+
+const API_BASE = process.env.NEXT_PUBLIC_APP_URL || "";
+
+async function fetchAPI(action: string, params: Record<string, string> = {}) {
+  const url = new URL(`${API_BASE}/api/products`);
+  url.searchParams.set("action", action);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) url.searchParams.set(key, value);
+  });
+  const res = await fetch(url.toString(), { cache: 'no-store' });
+  if (!res.ok) throw new Error(`API error: ${res.statusText}`);
+  return res.json();
+}
 
 // Shopify-compatible Product API
 export async function getShopifyProduct(
   handle: string,
 ): Promise<ShopifyProductOperation> {
-  const firestoreProduct = await getProduct(handle);
+  const { product } = await fetchAPI("product", { handle });
 
-  if (!firestoreProduct) {
+  if (!product) {
     throw new Error(`Product with handle "${handle}" not found`);
   }
 
-  const shopifyProduct = mapFirestoreToShopifyProduct(firestoreProduct);
+  const shopifyProduct = mapFirestoreToShopifyProduct(product);
 
   return {
     data: { product: shopifyProduct },
@@ -52,17 +55,9 @@ export async function getShopifyProducts(
   sortKey?: string,
   reverse?: boolean,
 ): Promise<ShopifyProductsOperation> {
-  let firestoreProducts: any[] = [];
+  const { products } = await fetchAPI("all");
 
-  if (query) {
-    // Search products
-    firestoreProducts = await searchProducts(query);
-  } else {
-    // Get all products (could add filtering/sorting later)
-    firestoreProducts = await getProducts();
-  }
-
-  const shopifyProducts = mapFirestoreToShopifyProducts(firestoreProducts);
+  const shopifyProducts = mapFirestoreToShopifyProducts(products || []);
 
   return {
     data: { products: shopifyProducts },
@@ -73,8 +68,8 @@ export async function getShopifyProducts(
 export async function getShopifyTrendingProducts(
   limit: number = 10,
 ): Promise<ShopifyProductsOperation> {
-  const firestoreProducts = await getTrendingProducts(limit);
-  const shopifyProducts = mapFirestoreToShopifyProducts(firestoreProducts);
+  const { products } = await fetchAPI("trending", { limit: limit.toString() });
+  const shopifyProducts = mapFirestoreToShopifyProducts(products || []);
 
   return {
     data: { products: shopifyProducts },
@@ -85,10 +80,8 @@ export async function getShopifyTrendingProducts(
 export async function getShopifyProductRecommendations(
   productId: string,
 ): Promise<ShopifyProductsOperation> {
-  // For now, return trending products as recommendations
-  // In the future, this could use more sophisticated recommendation logic
-  const firestoreProducts = await getTrendingProducts(4);
-  const shopifyProducts = mapFirestoreToShopifyProducts(firestoreProducts);
+  const { products } = await fetchAPI("trending", { limit: "4" });
+  const shopifyProducts = mapFirestoreToShopifyProducts(products || []);
 
   return {
     data: { products: shopifyProducts },
@@ -100,14 +93,12 @@ export async function getShopifyProductRecommendations(
 export async function getShopifyCollection(
   handle: string,
 ): Promise<ShopifyCollectionOperation> {
-  // For now, create collections based on hair types
-  // In the future, this could be more sophisticated
-  const products = await getProducts({ hair_type: handle });
+  const { products } = await fetchAPI("collection", { collection: handle });
   const collection = mapFirestoreToShopifyCollection(
     handle,
     `${handle.charAt(0).toUpperCase() + handle.slice(1)} Wigs`,
     `High-quality ${handle} wigs for every style and occasion.`,
-    products,
+    products || [],
   );
 
   return {
@@ -117,7 +108,6 @@ export async function getShopifyCollection(
 }
 
 export async function getShopifyCollections(): Promise<ShopifyCollectionsOperation> {
-  // Define available collections based on hair types
   const hairTypes = [
     "kinky_curly",
     "straight",
@@ -160,8 +150,8 @@ export async function getShopifyCollectionProducts(
   reverse?: boolean,
   sortKey?: string,
 ): Promise<ShopifyProductsOperation> {
-  const products = await getProducts({ hair_type: handle });
-  const shopifyProducts = mapFirestoreToShopifyProducts(products);
+  const { products } = await fetchAPI("collection", { collection: handle });
+  const shopifyProducts = mapFirestoreToShopifyProducts(products || []);
 
   return {
     data: { products: shopifyProducts },
@@ -169,31 +159,14 @@ export async function getShopifyCollectionProducts(
   };
 }
 
-// Shopify-compatible Cart API
+// Shopify-compatible Cart API - these still need server-side implementation
 export async function getShopifyCart(
   cartId: string,
 ): Promise<ShopifyCartOperation> {
-  const firestoreCart = await getCart(cartId);
-
-  if (!firestoreCart) {
-    throw new Error(`Cart with ID "${cartId}" not found`);
-  }
-
-  // Get all products referenced in cart for mapping
-  const productIds = firestoreCart.items.map((item) => item.productId);
-  const allProducts = await getProducts();
-  const cartProducts = allProducts.filter((p) => productIds.includes(p.id));
-
-  const shopifyCart = mapFirestoreToShopifyCart(firestoreCart, cartProducts);
-
-  return {
-    data: { cart: shopifyCart },
-    variables: { cartId },
-  };
+  throw new Error("Cart operations should use API routes");
 }
 
 export async function createShopifyCart(): Promise<ShopifyCreateCartOperation> {
-  // Create an empty cart
   const emptyCart: ShopifyCart = {
     id: undefined,
     checkoutUrl: "/checkout",
@@ -221,59 +194,37 @@ export async function addToShopifyCart(
   cartId: string,
   lines: { merchandiseId: string; quantity: number }[],
 ): Promise<ShopifyAddToCartOperation> {
-  // For simplicity, we'll use the cartId as userId
-  // In a real implementation, you'd have proper user authentication
-
-  for (const line of lines) {
-    await addToFirestoreCart(cartId, line.merchandiseId, line.quantity);
-  }
-
-  const updatedCart = await getShopifyCart(cartId);
-
-  return {
-    data: { cartLinesAdd: { cart: updatedCart.data.cart } },
-    variables: { cartId, lines },
-  };
+  throw new Error("Cart operations should use API routes");
 }
 
 export async function removeFromShopifyCart(
   cartId: string,
   lineIds: string[],
 ): Promise<ShopifyRemoveFromCartOperation> {
-  for (const lineId of lineIds) {
-    await removeFromFirestoreCart(cartId, lineId);
-  }
-
-  const updatedCart = await getShopifyCart(cartId);
-
-  return {
-    data: { cartLinesRemove: { cart: updatedCart.data.cart } },
-    variables: { cartId, lineIds },
-  };
+  throw new Error("Cart operations should use API routes");
 }
 
 export async function updateShopifyCart(
   cartId: string,
   lines: { id: string; merchandiseId: string; quantity: number }[],
 ): Promise<ShopifyUpdateCartOperation> {
-  for (const line of lines) {
-    await updateFirestoreCartQuantity(cartId, line.id, line.quantity);
-  }
-
-  const updatedCart = await getShopifyCart(cartId);
-
-  return {
-    data: { cartLinesUpdate: { cart: updatedCart.data.cart } },
-    variables: { cartId, lines },
-  };
+  throw new Error("Cart operations should use API routes");
 }
 
-// Utility function to get filtered products in Shopify format
 export async function getShopifyFilteredProducts(
   filters: ProductFilters,
 ): Promise<ShopifyProductsOperation> {
-  const firestoreProducts = await getProducts(filters);
-  const shopifyProducts = mapFirestoreToShopifyProducts(firestoreProducts);
+  const { products } = await fetchAPI("all");
+  let filtered = products || [];
+
+  if (filters?.hair_type) {
+    const hairTypes = Array.isArray(filters.hair_type) ? filters.hair_type : [filters.hair_type];
+    filtered = filtered.filter((p: any) => 
+      hairTypes.includes(p.specifications?.hair_type)
+    );
+  }
+
+  const shopifyProducts = mapFirestoreToShopifyProducts(filtered);
 
   return {
     data: { products: shopifyProducts },

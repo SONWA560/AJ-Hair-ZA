@@ -1,30 +1,7 @@
 // Firebase-based ecommerce functions replacing Shopify
-import {
-  getProducts,
-  getProduct,
-  searchProducts,
-  getTrendingProducts,
-  addToCart,
-  getCart,
-  removeFromCart,
-  updateCartQuantity,
-  logSearchQuery,
-} from "./firebase/firestore";
+// Use API routes for products - cart functions provided separately
 
 import { Product, ProductFilters, Cart, CartItem } from "./types";
-
-// Re-export functions for compatibility with existing components
-export {
-  getProducts,
-  getProduct,
-  searchProducts,
-  getTrendingProducts,
-  addToCart,
-  getCart,
-  removeFromCart,
-  updateCartQuantity,
-  logSearchQuery,
-};
 
 // Type exports for compatibility
 export type { Product, ProductFilters, Cart, CartItem };
@@ -38,7 +15,10 @@ export interface Collection {
   image?: string;
 }
 
-// Collection and menu functions (Firebase versions)
+export interface CollectionWithImage extends Collection {
+  image?: string;
+}
+
 export async function getCollections(): Promise<Collection[]> {
   return [
     {
@@ -47,7 +27,6 @@ export async function getCollections(): Promise<Collection[]> {
       description: "Sleek and straight human hair wigs",
       path: "/search/straight-hair",
       hairTypes: ["straight"],
-      image: "/images/straight-hair.jpg",
     },
     {
       handle: "curly-wavy",
@@ -55,7 +34,6 @@ export async function getCollections(): Promise<Collection[]> {
       description: "Beautiful curly and wavy wigs",
       path: "/search/curly-wavy",
       hairTypes: ["wavy", "body_wave", "deep_wave", "water_wave"],
-      image: "/images/curly-wavy.jpeg",
     },
     {
       handle: "kinky-coily",
@@ -63,7 +41,6 @@ export async function getCollections(): Promise<Collection[]> {
       description: "Natural kinky curly and coily wigs",
       path: "/search/kinky-coily",
       hairTypes: ["kinky_curly", "coily"],
-      image: "/images/kinky-coily.jpg",
     },
     {
       handle: "new-arrivals",
@@ -71,41 +48,24 @@ export async function getCollections(): Promise<Collection[]> {
       description: "Latest wig collections",
       path: "/search/new-arrivals",
       hairTypes: [],
-      image: "/images/new-arrivals.jpeg",
     },
   ];
-}
-
-export interface CollectionWithImage extends Collection {
-  image?: string;
 }
 
 export async function getCollectionsWithImages(): Promise<CollectionWithImage[]> {
   const collections = await getCollections();
   
-  // Use the static image from each collection, or fallback to first product image
-  const collectionsWithImages = await Promise.all(
-    collections.map(async (collection) => {
-      // If collection has a static image, use it
-      if (collection.image) {
-        return {
-          ...collection,
-          image: collection.image,
-        };
-      }
-      
-      // Otherwise, try to get from first product
-      const products = await getCollectionProducts(collection.handle);
-      const firstProduct = products[0];
-      const image = firstProduct && firstProduct.images.length > 0 ? firstProduct.images[0]?.url : undefined;
-      return {
-        ...collection,
-        image,
-      };
-    })
-  );
+  const imageMap: Record<string, string> = {
+    "straight-hair": "/images/straight-hair.jpg",
+    "curly-wavy": "/images/curly-wavy.jpeg",
+    "kinky-coily": "/images/kinky-coily.jpg",
+    "new-arrivals": "/images/new-arrivals.jpeg",
+  };
   
-  return collectionsWithImages;
+  return collections.map((collection) => ({
+    ...collection,
+    image: imageMap[collection.handle] || `/images/${collection.handle}.jpg`,
+  }));
 }
 
 export async function getCollection(handle: string) {
@@ -118,22 +78,9 @@ export async function getCollectionProducts(
   reverse?: boolean,
   sortKey?: string,
 ): Promise<Product[]> {
-  const collectionMap: Record<string, Partial<ProductFilters>> = {
-    "straight-hair": { hair_type: "straight" },
-    "curly-wavy": { hair_type: ["wavy", "body_wave", "deep_wave", "water_wave"] },
-    "kinky-coily": { hair_type: ["kinky_curly", "coily"] },
-    "new-arrivals": {},
-  };
-
-  const filters = collectionMap[handle];
-  if (filters) {
-    return await getProducts(filters);
-  }
-
   return [];
 }
 
-// Cart utility functions for client-side usage
 export function createCartCookieId() {
   return (
     Math.random().toString(36).substring(2, 15) +
@@ -148,13 +95,11 @@ export function formatPrice(amount: number, currency: string = "ZAR") {
   }).format(amount);
 }
 
-// Image utility functions
 export function getOptimizedImageUrl(
   url: string,
   width?: number,
   height?: number,
 ) {
-  // For Firebase Storage, we can use Google's image optimization
   if (url.includes("firebasestorage.googleapis.com")) {
     const baseUrl = url.split("?")[0];
     const params = new URLSearchParams();
@@ -168,7 +113,6 @@ export function getOptimizedImageUrl(
   return url;
 }
 
-// SEO utilities
 export function generateProductHandle(title: string) {
   return title
     .toLowerCase()
@@ -177,7 +121,6 @@ export function generateProductHandle(title: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-// Category and filter utilities
 export function getHairTypes() {
   return [
     { value: "kinky_curly", label: "Kinky Curly" },

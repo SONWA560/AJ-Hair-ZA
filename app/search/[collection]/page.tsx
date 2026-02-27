@@ -1,4 +1,3 @@
-import { getProductsByHairType } from "lib/firebase/firestore";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -39,14 +38,14 @@ export default async function CategoryPage(props: {
   const hairTypes = collectionHairTypeMap[collection];
   
   try {
-    if (collection === "new-arrivals") {
-      // For new arrivals, get all products sorted by newest
-      const { getProducts } = await import("lib/firebase/firestore");
-      products = await getProducts({ sortBy: "newest" });
-    } else if (hairTypes) {
-      products = await getProductsByHairType(collection);
-    } else {
-      products = await getProductsByHairType(collection);
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${process.env.PORT || 3000}`;
+    const response = await fetch(`${baseUrl}/api/products?action=collection&collection=${collection}`, {
+      cache: 'no-store'
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      products = data.products || [];
     }
   } catch (error) {
     console.error("Error fetching collection products:", error);

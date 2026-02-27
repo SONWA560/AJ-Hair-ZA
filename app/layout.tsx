@@ -2,7 +2,6 @@ import { CartProvider } from "components/cart/cart-context";
 import { AuthenticatedCartProvider } from "components/cart/authenticated-cart-provider";
 import { Navbar } from "components/layout/navbar";
 import { GeistSans } from "geist/font/sans";
-import { getCart } from "lib/firebase/firestore";
 import { baseUrl } from "lib/utils";
 import type { Cart } from "lib/types";
 import { ReactNode } from "react";

@@ -1,7 +1,13 @@
 import { GridTileImage } from "components/grid/tile";
-import { getTrendingProducts } from "lib/firebase/firestore";
 import type { Product } from "lib/types";
 import Link from "next/link";
+
+async function fetchTrending(limit: number = 3) {
+  const res = await fetch(`/api/products?action=trending&limit=${limit}`, { cache: 'no-store' });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.products || [];
+}
 
 function ThreeItemGridItem({
   item,
@@ -48,8 +54,7 @@ function ThreeItemGridItem({
 }
 
 export async function ThreeItemGrid() {
-  // Get trending products for homepage
-  const homepageItems = await getTrendingProducts(3);
+  const homepageItems = await fetchTrending(3);
 
   if (!homepageItems[0] || !homepageItems[1] || !homepageItems[2]) return null;
 
