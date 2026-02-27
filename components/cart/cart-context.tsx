@@ -1,105 +1,31 @@
 "use client";
 
 import type { Cart, CartItem, Product } from "lib/types";
-import { getCart as getCartFromFirestore, addToCart as addToCartToFirestore } from "lib/cart-client";
 import {
   createContext,
-  use,
   useContext,
   useMemo,
-  useOptimistic,
   useCallback,
   useEffect,
-  startTransition,
+  useState,
 } from "react";
 
 type UpdateType = "plus" | "minus" | "delete";
 
-type CartAction =
-  | {
-      type: "UPDATE_ITEM";
-      payload: { itemId: string; updateType: UpdateType };
-    }
-  | {
-      type: "ADD_ITEM";
-      payload: { product: Product; variant?: any };
-    }
-  | {
-      type: "SET_CART";
-      payload: Cart;
-    }
-  | {
-      type: "CLEAR_CART";
-    };
-
 type CartContextType = {
   cart: Cart | undefined;
   userId: string;
+  updateCartItem: (itemId: string, updateType: UpdateType) => void;
+  addCartItem: (product: Product, variant?: any) => void;
+  setCart: (cart: Cart) => void;
+  clearCart: () => void;
+  isLoading: boolean;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = "shara-commerce-cart";
-const PENDING_CART_KEY = "shara-pending-cart";
-
-function calculateItemCost(quantity: number, price: number): number {
-  return price * quantity;
-}
-
-function updateCartItem(
-  item: CartItem,
-  updateType: UpdateType,
-): CartItem | null {
-  if (updateType === "delete") return null;
-
-  const newQuantity =
-    updateType === "plus" ? item.quantity + 1 : item.quantity - 1;
-  if (newQuantity === 0) return null;
-
-  return {
-    ...item,
-    quantity: newQuantity,
-  };
-}
-
-function createOrUpdateCartItem(
-  existingItem: CartItem | undefined,
-  product: Product,
-  variant?: any,
-): CartItem {
-  const quantity = existingItem ? existingItem.quantity + 1 : 1;
-  const totalAmount = calculateItemCost(quantity, product.price);
-
-  return {
-    id: existingItem?.id || Math.random().toString(36).substring(2, 9),
-    productId: product.id,
-    title: product.title,
-    price: product.price,
-    quantity,
-    image: product.images[0]?.url || "",
-    variant: variant || {
-      hair_type: product.specifications?.hair_type,
-      length: product.specifications?.length,
-      color: product.specifications?.color,
-    },
-  };
-}
-
-function updateCartTotals(lines: CartItem[]): {
-  totalQuantity: number;
-  total: number;
-} {
-  const totalQuantity = lines.reduce((sum, item) => sum + item.quantity, 0);
-  const totalAmount = lines.reduce(
-    (sum, item) => sum + calculateItemCost(item.quantity, item.price),
-    0,
-  );
-
-  return {
-    totalQuantity,
-    total: totalAmount,
-  };
-}
+const LOCAL_STORAGE_KEY = "ajhair-cart";
+const PENDING_CART_KEY = "ajhair-pending-cart";
 
 function createEmptyCart(userId?: string): Cart {
   return {
@@ -107,96 +33,25 @@ function createEmptyCart(userId?: string): Cart {
     userId: userId || "guest",
     items: [],
     total: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    createdAt: undefined,
+    updatedAt: undefined,
   };
 }
 
-function cartReducer(state: Cart | undefined, action: CartAction): Cart {
-  const currentCart = state || createEmptyCart();
+function calculateTotal(items: CartItem[]): number {
+  return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+}
 
-  switch (action.type) {
-    case "SET_CART":
-      return action.payload;
-    
-    case "CLEAR_CART":
-      return createEmptyCart(currentCart.userId);
-
-    case "UPDATE_ITEM": {
-      const { itemId, updateType } = action.payload;
-      const updatedItems = currentCart.items
-        .map((item) =>
-          item.id === itemId ? updateCartItem(item, updateType) : item,
-        )
-        .filter(Boolean) as CartItem[];
-
-      const { totalQuantity, total } = updateCartTotals(updatedItems);
-
-      return {
-        ...currentCart,
-        items: updatedItems,
-        total,
-        updatedAt: new Date(),
-      };
-    }
-    case "ADD_ITEM": {
-      const { product, variant } = action.payload;
-      const existingItem = currentCart.items.find(
-        (item) => item.productId === product.id,
+export function savePendingCartItem(item: {
+  product: Product;
+  variant?: any;
+  quantity?: number;
+}) {
+  if (typeof window !== "undefined") {
+    try {
+      const pending = JSON.parse(
+        localStorage.getItem(PENDING_CART_KEY) || "[]",
       );
-      const updatedItem = createOrUpdateCartItem(existingItem, product, variant);
-
-      const updatedItems = existingItem
-        ? currentCart.items.map((item) =>
-            item.productId === product.id ? updatedItem : item,
-          )
-        : [...currentCart.items, updatedItem];
-
-      const { totalQuantity, total } = updateCartTotals(updatedItems);
-
-      return {
-        ...currentCart,
-        items: updatedItems,
-        total,
-        updatedAt: new Date(),
-      };
-    }
-    default:
-      return currentCart;
-  }
-}
-
-// Save cart to localStorage
-function saveCartToLocalStorage(cart: Cart): void {
-  if (typeof window !== "undefined") {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(cart));
-    } catch (e) {
-      console.error("Failed to save cart to localStorage:", e);
-    }
-  }
-}
-
-// Load cart from localStorage
-function loadCartFromLocalStorage(): Cart | null {
-  if (typeof window !== "undefined") {
-    try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.error("Failed to load cart from localStorage:", e);
-    }
-  }
-  return null;
-}
-
-// Save pending cart item (for guest users who try to add to cart)
-export function savePendingCartItem(item: { product: Product; variant?: any; quantity: number }): void {
-  if (typeof window !== "undefined") {
-    try {
-      const pending = JSON.parse(localStorage.getItem(PENDING_CART_KEY) || "[]");
       pending.push(item);
       localStorage.setItem(PENDING_CART_KEY, JSON.stringify(pending));
     } catch (e) {
@@ -205,11 +60,16 @@ export function savePendingCartItem(item: { product: Product; variant?: any; qua
   }
 }
 
-// Get and clear pending cart items
-export function getAndClearPendingCartItems(): { product: Product; variant?: any; quantity: number }[] {
+export function getAndClearPendingCartItems(): {
+  product: Product;
+  variant?: any;
+  quantity: number;
+}[] {
   if (typeof window !== "undefined") {
     try {
-      const pending = JSON.parse(localStorage.getItem(PENDING_CART_KEY) || "[]");
+      const pending = JSON.parse(
+        localStorage.getItem(PENDING_CART_KEY) || "[]",
+      );
       localStorage.removeItem(PENDING_CART_KEY);
       return pending;
     } catch (e) {
@@ -221,21 +81,157 @@ export function getAndClearPendingCartItems(): { product: Product; variant?: any
 
 export function CartProvider({
   children,
-  cart,
+  initialCart,
   userId,
 }: {
   children: React.ReactNode;
-  cart: Cart | undefined;
+  initialCart?: Cart;
   userId: string;
 }) {
-  // Ensure we always have a valid context value
-  const contextValue = useMemo(
-    () => ({ cart, userId }),
-    [cart, userId]
+  const [cart, setCartState] = useState<Cart>(
+    initialCart || createEmptyCart(userId),
+  );
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed.userId === userId || parsed.userId === "guest") {
+          setCartState(parsed);
+        }
+      } catch (e) {
+        console.error("Failed to parse stored cart:", e);
+      }
+    }
+    setIsLoading(false);
+  }, [userId]);
+
+  const saveToStorage = useCallback((newCart: Cart) => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(newCart));
+  }, []);
+
+  const updateCartItem = useCallback(
+    (itemId: string, updateType: UpdateType) => {
+      setCartState((prevCart) => {
+        const items = [...prevCart.items];
+        const itemIndex = items.findIndex((item) => item.id === itemId);
+
+        if (itemIndex === -1) return prevCart;
+
+        const item = items[itemIndex];
+        if (!item) return prevCart;
+
+        let newItems: CartItem[];
+
+        if (
+          updateType === "delete" ||
+          (updateType === "minus" && item.quantity === 1)
+        ) {
+          newItems = items.filter((_, i) => i !== itemIndex);
+        } else if (updateType === "plus") {
+          items[itemIndex] = { ...item, quantity: item.quantity + 1 };
+          newItems = items;
+        } else if (updateType === "minus") {
+          items[itemIndex] = { ...item, quantity: item.quantity - 1 };
+          newItems = items;
+        } else {
+          return prevCart;
+        }
+
+        const newCart = {
+          ...prevCart,
+          items: newItems,
+          total: calculateTotal(newItems),
+          updatedAt: new Date(),
+        };
+
+        saveToStorage(newCart);
+        return newCart;
+      });
+    },
+    [saveToStorage],
   );
 
+  const addCartItem = useCallback(
+    (product: Product, variant?: any) => {
+      setCartState((prevCart) => {
+        const items = [...prevCart.items];
+        const existingItem = items.find(
+          (item) => item.productId === product.id,
+        );
+
+        let newItems: CartItem[];
+
+        if (existingItem) {
+          newItems = items.map((item) =>
+            item.productId === product.id
+              ? { ...item, quantity: item.quantity + 1 }
+              : item,
+          );
+        } else {
+          const newItem: CartItem = {
+            id: Math.random().toString(36).substring(2, 9),
+            productId: product.id,
+            title: product.title,
+            price: product.price,
+            quantity: 1,
+            image: product.images[0]?.url || "",
+            variant: variant || {
+              hair_type: product.specifications?.hair_type,
+              length: product.specifications?.length,
+              color: product.specifications?.color,
+            },
+          };
+          newItems = [...items, newItem];
+        }
+
+        const newCart = {
+          ...prevCart,
+          items: newItems,
+          total: calculateTotal(newItems),
+          updatedAt: new Date(),
+        };
+
+        saveToStorage(newCart);
+        return newCart;
+      });
+    },
+    [saveToStorage],
+  );
+
+  const setCart = useCallback(
+    (newCart: Cart) => {
+      setCartState(newCart);
+      saveToStorage(newCart);
+    },
+    [saveToStorage],
+  );
+
+  const clearCart = useCallback(() => {
+    const emptyCart = createEmptyCart(userId);
+    setCartState(emptyCart);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+    }
+  }, [userId]);
+
   return (
-    <CartContext.Provider value={contextValue}>
+    <CartContext.Provider
+      value={{
+        cart,
+        userId,
+        updateCartItem,
+        addCartItem,
+        setCart,
+        clearCart,
+        isLoading,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
@@ -243,127 +239,10 @@ export function CartProvider({
 
 export function useCart() {
   const context = useContext(CartContext);
-  
-  // Create a fallback cart
-  const fallbackCart: Cart = {
-    id: "fallback",
-    userId: "fallback",
-    items: [],
-    total: 0,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
 
-  // Determine cart and userId from context, or use fallback
-  let cart = fallbackCart;
-  let userId = "fallback";
-  let isValidContext = false;
-
-  if (context !== undefined && context.cart !== undefined && context.userId !== undefined) {
-    cart = context.cart;
-    userId = context.userId;
-    isValidContext = true;
+  if (context === undefined) {
+    throw new Error("useCart must be used within a CartProvider");
   }
-  
-  // Always call hooks in the same order
-  const [optimisticCart, updateOptimisticCart] = useOptimistic(
-    cart,
-    cartReducer,
-  );
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && optimisticCart) {
-      saveCartToLocalStorage(optimisticCart);
-    }
-  }, [optimisticCart]);
-
-  // Ensure we always have a valid cart with items array
-  const effectiveCart = optimisticCart || cart || fallbackCart;
-
-  // Define all callbacks - they can use fallback implementations if not valid
-  const noop = useCallback(() => {}, []);
-  
-  const syncWithFirestore = useCallback(async () => {
-    if (!isValidContext) return;
-    try {
-      const freshCart = await getCartFromFirestore(userId);
-      if (freshCart) {
-        updateOptimisticCart({
-          type: "SET_CART",
-          payload: freshCart,
-        });
-        saveCartToLocalStorage(freshCart);
-      }
-    } catch (e) {
-      console.error("Failed to sync cart with Firestore:", e);
-    }
-  }, [isValidContext, userId, updateOptimisticCart]);
-
-  const updateCartItem = useCallback(
-    (itemId: string, updateType: UpdateType) => {
-      if (!isValidContext) return;
-      startTransition(() => {
-        updateOptimisticCart({
-          type: "UPDATE_ITEM",
-          payload: { itemId, updateType },
-        });
-      });
-      try {
-        addToCartToFirestore(userId, []).catch(e => console.error("Failed to update cart item:", e));
-      } catch (e) {
-        console.error("Failed to update cart item:", e);
-      }
-    },
-    [isValidContext, updateOptimisticCart, userId],
-  );
-
-  const addCartItem = useCallback(
-    (product: Product, variant?: any) => {
-      if (!isValidContext) return;
-      startTransition(() => {
-        updateOptimisticCart({
-          type: "ADD_ITEM",
-          payload: { product, variant },
-        });
-      });
-      const currentCart = effectiveCart || createEmptyCart(userId);
-      saveCartToLocalStorage(currentCart);
-    },
-    [isValidContext, updateOptimisticCart, effectiveCart, userId],
-  );
-
-  const setCart = useCallback(
-    (cart: Cart) => {
-      if (!isValidContext) return;
-      updateOptimisticCart({
-        type: "SET_CART",
-        payload: cart,
-      });
-      saveCartToLocalStorage(cart);
-    },
-    [isValidContext, updateOptimisticCart],
-  );
-
-  const clearCart = useCallback(() => {
-    if (!isValidContext) return;
-    updateOptimisticCart({
-      type: "CLEAR_CART",
-    });
-    if (typeof window !== "undefined") {
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-    }
-  }, [isValidContext, updateOptimisticCart]);
-
-  return useMemo(
-    () => ({
-      cart: effectiveCart,
-      updateCartItem,
-      addCartItem,
-      setCart,
-      clearCart,
-      syncWithFirestore,
-      userId,
-    }),
-    [effectiveCart, updateCartItem, addCartItem, setCart, clearCart, syncWithFirestore, userId],
-  );
+  return context;
 }

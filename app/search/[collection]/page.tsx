@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { CollectionSearchClient } from "@/components/collection-search-client";
+import { baseUrl } from "lib/utils";
 
 const collectionHairTypeMap: Record<string, string[]> = {
   "straight-hair": ["straight"],
@@ -34,15 +35,18 @@ export default async function CategoryPage(props: {
   const collection = params.collection;
 
   let products: any[] = [];
-  
+
   const hairTypes = collectionHairTypeMap[collection];
-  
+
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `http://localhost:${process.env.PORT || 3000}`;
-    const response = await fetch(`${baseUrl}/api/products?action=collection&collection=${collection}`, {
-      cache: 'no-store'
-    });
-    
+    const API_BASE = `${baseUrl()}`;
+    const response = await fetch(
+      `${API_BASE}/api/products?action=collection&collection=${collection}`,
+      {
+        cache: "no-store",
+      },
+    );
+
     if (response.ok) {
       const data = await response.json();
       products = data.products || [];
@@ -53,9 +57,9 @@ export default async function CategoryPage(props: {
   }
 
   return (
-    <CollectionSearchClient 
-      initialProducts={products} 
-      collection={collection} 
+    <CollectionSearchClient
+      initialProducts={products}
+      collection={collection}
     />
   );
 }

@@ -1,21 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { addToShopifyCart } from "lib/firestore";
+import { addToCart, getCart } from "@/lib/firebase/firestore";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { cartId, lines } = body;
 
-    if (!cartId || !lines) {
+    if (!cartId || !lines || !lines.length) {
       return NextResponse.json(
         { error: "cartId and lines are required" },
         { status: 400 },
       );
     }
 
-    const result = await addToShopifyCart(cartId, lines);
+    const line = lines[0];
+    const cart = await addToCart(cartId, line.merchandiseId, line.quantity);
 
-    return NextResponse.json(result);
+    return NextResponse.json({ data: { cart }, variables: { cartId } });
   } catch (error) {
     console.error("Error adding to cart:", error);
     return NextResponse.json(

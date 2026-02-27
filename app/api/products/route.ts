@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProducts, getProductsByHairType, getTrendingProducts } from "@/lib/firebase/firestore";
+import {
+  getProducts,
+  getProductsByHairType,
+  getTrendingProducts,
+  getProduct,
+} from "@/lib/firebase/firestore";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -16,17 +21,22 @@ export async function GET(request: NextRequest) {
 
       case "collection":
         if (!collection) {
-          return NextResponse.json({ error: "Collection required" }, { status: 400 });
+          return NextResponse.json(
+            { error: "Collection required" },
+            { status: 400 },
+          );
         }
         const products = await getProductsByHairType(collection);
         return NextResponse.json({ products });
 
       case "product":
-        const { getProductByHandle } = await import("@/lib/firebase/firestore");
         if (!handle) {
-          return NextResponse.json({ error: "Handle required" }, { status: 400 });
+          return NextResponse.json(
+            { error: "Handle required" },
+            { status: 400 },
+          );
         }
-        const product = await getProductByHandle(handle);
+        const product = await getProduct(handle);
         return NextResponse.json({ product });
 
       case "all":
@@ -36,6 +46,9 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     console.error("API Error:", error);
-    return NextResponse.json({ error: "Failed to fetch products" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch products" },
+      { status: 500 },
+    );
   }
 }

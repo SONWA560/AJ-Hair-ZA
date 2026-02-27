@@ -8,16 +8,25 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { baseUrl } from "lib/utils";
+
+const API_BASE = `${baseUrl()}`;
 
 async function fetchProduct(handle: string) {
-  const res = await fetch(`/api/products?action=product&handle=${handle}`, { cache: 'no-store' });
+  const res = await fetch(
+    `${API_BASE}/api/products?action=product&handle=${handle}`,
+    { cache: "no-store" },
+  );
   if (!res.ok) return null;
   const data = await res.json();
   return data.product;
 }
 
 async function fetchTrending(limit: number = 4) {
-  const res = await fetch(`/api/products?action=trending&limit=${limit}`, { cache: 'no-store' });
+  const res = await fetch(
+    `${API_BASE}/api/products?action=trending&limit=${limit}`,
+    { cache: "no-store" },
+  );
   if (!res.ok) return [];
   const data = await res.json();
   return data.products || [];
@@ -109,11 +118,17 @@ export default async function ProductPage(props: {
       />
       <div className="mx-auto max-w-(--breakpoint-2xl) px-4">
         <div className="mb-6">
-          <Breadcrumb 
+          <Breadcrumb
             items={[
-              { title: product.specifications?.hair_type?.replace("_", " ").replace(/\b\w/g, (l: string) => l.toUpperCase()) || "Shop", href: `/search/${getCollectionFromHairType(product.specifications?.hair_type)}` },
-              { title: product.title }
-            ]} 
+              {
+                title:
+                  product.specifications?.hair_type
+                    ?.replace("_", " ")
+                    .replace(/\b\w/g, (l: string) => l.toUpperCase()) || "Shop",
+                href: `/search/${getCollectionFromHairType(product.specifications?.hair_type)}`,
+              },
+              { title: product.title },
+            ]}
           />
         </div>
         <div className="flex flex-col rounded-lg border border-neutral-200 bg-white p-8 md:p-12 lg:flex-row lg:gap-8 dark:border-neutral-800 dark:bg-black">

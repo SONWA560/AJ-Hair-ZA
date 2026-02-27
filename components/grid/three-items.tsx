@@ -1,9 +1,15 @@
 import { GridTileImage } from "components/grid/tile";
 import type { Product } from "lib/types";
 import Link from "next/link";
+import { baseUrl } from "lib/utils";
+
+const API_BASE = `${baseUrl()}`;
 
 async function fetchTrending(limit: number = 3) {
-  const res = await fetch(`/api/products?action=trending&limit=${limit}`, { cache: 'no-store' });
+  const res = await fetch(
+    `${API_BASE}/api/products?action=trending&limit=${limit}`,
+    { cache: "no-store" },
+  );
   if (!res.ok) return [];
   const data = await res.json();
   return data.products || [];
