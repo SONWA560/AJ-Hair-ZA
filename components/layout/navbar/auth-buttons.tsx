@@ -1,13 +1,15 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
+    SignedIn,
+    SignedOut,
+    SignInButton,
+    SignUpButton,
+    UserButton,
 } from "@clerk/nextjs";
+import { Heart, User } from "lucide-react";
+import Link from "next/link";
+import { useSyncExternalStore } from "react";
 
 function useHydrated() {
   return useSyncExternalStore(
@@ -43,6 +45,20 @@ export function AuthButtons() {
         </SignUpButton>
       </SignedOut>
       <SignedIn>
+        <Link
+          href="/account/wishlist"
+          aria-label="Wishlist"
+          className="text-neutral-500 transition-colors hover:text-black dark:text-neutral-400 dark:hover:text-white"
+        >
+          <Heart size={20} />
+        </Link>
+        <Link
+          href="/account"
+          aria-label="My Account"
+          className="text-neutral-500 transition-colors hover:text-black dark:text-neutral-400 dark:hover:text-white"
+        >
+          <User size={20} />
+        </Link>
         <UserButton afterSignOutUrl="/" />
       </SignedIn>
     </>

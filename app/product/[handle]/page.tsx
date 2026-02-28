@@ -1,14 +1,17 @@
+import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { getAdminDb } from "@/lib/firebase/admin";
+import { getProducts } from "@/lib/firebase/firestore";
 import { GridTileImage } from "components/grid/tile";
 import Footer from "components/layout/footer";
 import { Gallery } from "components/product/gallery";
 import { ProductDescription } from "components/product/product-description";
+import { FieldValue } from "firebase-admin/firestore";
 import type { Product } from "lib/types";
+import { baseUrl } from "lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
-import { baseUrl } from "lib/utils";
 
 const API_BASE = `${baseUrl()}`;
 
@@ -20,16 +23,6 @@ async function fetchProduct(handle: string) {
   if (!res.ok) return null;
   const data = await res.json();
   return data.product;
-}
-
-async function fetchTrending(limit: number = 4) {
-  const res = await fetch(
-    `${API_BASE}/api/products?action=trending&limit=${limit}`,
-    { cache: "no-store" },
-  );
-  if (!res.ok) return [];
-  const data = await res.json();
-  return data.products || [];
 }
 
 export async function generateMetadata(props: {
@@ -76,6 +69,15 @@ export default async function ProductPage(props: {
   const product = await fetchProduct(params.handle);
 
   if (!product) return notFound();
+
+  // Increment view count — fire and forget (don't block render)
+  if (product.id) {
+    void getAdminDb()
+      .collection("products")
+      .doc(product.id)
+      .update({ "metadata.views": FieldValue.increment(1) })
+      .catch(() => {});
+  }
 
   const getCollectionFromHairType = (hairType?: string): string => {
     if (!hairType) return "new-arrivals";
@@ -153,23 +155,41 @@ export default async function ProductPage(props: {
             </Suspense>
           </div>
         </div>
-        <RelatedProducts id={product.id} />
+        <RelatedProducts
+          id={product.id}
+          hairType={product.specifications?.hair_type}
+        />
       </div>
       <Footer />
     </>
   );
 }
 
-async function RelatedProducts({ id }: { id: string }) {
-  const relatedProducts = await fetchTrending(4);
+async function RelatedProducts({
+  id,
+  hairType,
+}: {
+  id: string;
+  hairType?: string;
+}) {
+  let similar: Product[] = [];
 
-  if (!relatedProducts.length) return null;
+  if (hairType) {
+    try {
+      const byHairType = await getProducts({ hair_type: hairType });
+      similar = byHairType.filter((p) => p.id !== id).slice(0, 4);
+    } catch {
+      // fall through to empty
+    }
+  }
+
+  if (similar.length === 0) return null;
 
   return (
     <div className="py-8">
-      <h2 className="mb-4 text-2xl font-bold">Related Products</h2>
+      <h2 className="mb-4 text-2xl font-bold">Similar Wigs You Might Like</h2>
       <ul className="flex w-full gap-4 overflow-x-auto pt-1">
-        {relatedProducts.map((product: Product) => (
+        {similar.map((product: Product) => (
           <li
             key={product.id}
             className="aspect-square w-full flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"

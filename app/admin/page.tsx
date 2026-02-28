@@ -1,14 +1,14 @@
-import { redirect } from "next/navigation";
-import { auth } from "@clerk/nextjs/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, ShoppingCart, Users, DollarSign, TrendingUp, ArrowRight } from "lucide-react";
+import { auth } from "@clerk/nextjs/server";
+import { ArrowRight, DollarSign, Package, ShoppingCart, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function AdminDashboard() {
-  const { userId } = await auth();
-  
+  const { userId, orgId } = await auth();
+
   if (!userId) {
-    redirect("/sign-in?redirect=/admin");
+    redirect("/admin/unauthorized");
   }
 
   return (
