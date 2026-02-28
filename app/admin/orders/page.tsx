@@ -1,8 +1,8 @@
-import { redirect } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
 import { auth } from "@clerk/nextjs/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ShoppingCart, Filter } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 // Server-side data fetching will be done via API routes
 // This is a placeholder - actual data fetching will be implemented
@@ -12,10 +12,10 @@ export default async function AdminOrdersPage({
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
-  const { userId } = await auth();
-  
+  const { userId, orgId } = await auth();
+
   if (!userId) {
-    redirect("/sign-in?redirect=/admin/orders");
+    redirect("/admin/unauthorized");
   }
 
   // For now, allow any logged-in user

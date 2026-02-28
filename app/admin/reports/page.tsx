@@ -1,13 +1,13 @@
-import { redirect } from "next/navigation";
+import { Card, CardContent } from "@/components/ui/card";
 import { auth } from "@clerk/nextjs/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, TrendingUp, Users, Package } from "lucide-react";
+import { TrendingUp } from "lucide-react";
+import { redirect } from "next/navigation";
 
 export default async function AdminReportsPage() {
-  const { userId } = await auth();
-  
+  const { userId, orgId } = await auth();
+
   if (!userId) {
-    redirect("/sign-in?redirect=/admin/reports");
+    redirect("/admin/unauthorized");
   }
 
   return (

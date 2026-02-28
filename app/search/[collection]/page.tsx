@@ -1,15 +1,7 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
 
 import { CollectionSearchClient } from "@/components/collection-search-client";
-import { baseUrl } from "lib/utils";
-
-const collectionHairTypeMap: Record<string, string[]> = {
-  "straight-hair": ["straight"],
-  "curly-wavy": ["wavy", "body_wave", "deep_wave", "water_wave"],
-  "kinky-coily": ["kinky_curly", "coily"],
-  "new-arrivals": [],
-};
+import { getProductsByHairType } from "@/lib/firebase/firestore";
 
 export async function generateMetadata(props: {
   params: Promise<{ collection: string }>;
@@ -34,27 +26,7 @@ export default async function CategoryPage(props: {
   const params = await props.params;
   const collection = params.collection;
 
-  let products: any[] = [];
-
-  const hairTypes = collectionHairTypeMap[collection];
-
-  try {
-    const API_BASE = `${baseUrl()}`;
-    const response = await fetch(
-      `${API_BASE}/api/products?action=collection&collection=${collection}`,
-      {
-        cache: "no-store",
-      },
-    );
-
-    if (response.ok) {
-      const data = await response.json();
-      products = data.products || [];
-    }
-  } catch (error) {
-    console.error("Error fetching collection products:", error);
-    products = [];
-  }
+  const products = await getProductsByHairType(collection);
 
   return (
     <CollectionSearchClient

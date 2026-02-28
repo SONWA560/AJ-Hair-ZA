@@ -1,17 +1,15 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  BarChart3, 
-  Users, 
-  Settings,
-  Menu
+import {
+  BarChart3,
+  LayoutDashboard,
+  Menu,
+  Package,
+  ShoppingCart,
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 const navigation = [
@@ -33,14 +31,17 @@ export default function AdminLayout({
     <div className="min-h-screen bg-gray-50/50">
       {/* Mobile sidebar */}
       <div className="lg:hidden">
-        <div className="fixed inset-0 z-50 bg-black/50" 
+        <div
+          className="fixed inset-0 z-50 bg-black/50"
           onClick={() => setSidebarOpen(false)}
-          style={{ display: sidebarOpen ? 'block' : 'none' }}
+          style={{ display: sidebarOpen ? "block" : "none" }}
         />
-        <aside className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r transition-transform duration-200",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}>
+        <aside
+          className={cn(
+            "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r transition-transform duration-200",
+            sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          )}
+        >
           <AdminSidebar pathname={pathname} />
         </aside>
       </div>
@@ -70,9 +71,7 @@ export default function AdminLayout({
         </div>
 
         <main className="py-8">
-          <div className="px-4 sm:px-6 lg:px-8">
-            {children}
-          </div>
+          <div className="px-4 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>
     </div>
@@ -81,24 +80,30 @@ export default function AdminLayout({
 
 function AdminSidebar({ pathname }: { pathname: string }) {
   return (
-    <div className="flex h-16 items-center justify-center border-b px-6">
-      <Link href="/admin" className="flex items-center gap-2">
-        <span className="text-xl font-bold">AJ Hair ZA</span>
-        <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded">Admin</span>
-      </Link>
-    </div>
+    <>
+      <div className="flex h-16 shrink-0 items-center justify-center border-b px-6">
+        <Link href="/admin" className="flex items-center gap-2">
+          <span className="text-xl font-bold">AJ Hair ZA</span>
+          <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded">
+            Admin
+          </span>
+        </Link>
+      </div>
+      <AdminNav />
+    </>
   );
 }
 
-export function AdminNav() {
+function AdminNav() {
   const pathname = usePathname();
-  
+
   return (
     <nav className="flex-1 space-y-1 px-3 py-4">
       {navigation.map((item) => {
-        const isActive = pathname === item.href || 
+        const isActive =
+          pathname === item.href ||
           (item.href !== "/admin" && pathname.startsWith(item.href));
-        
+
         return (
           <Link
             key={item.name}
@@ -107,13 +112,15 @@ export function AdminNav() {
               isActive
                 ? "bg-gray-100 text-gray-900"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-              "group flex items-center rounded-md px-3 py-2 text-sm font-medium"
+              "group flex items-center rounded-md px-3 py-2 text-sm font-medium",
             )}
           >
             <item.icon
               className={cn(
-                isActive ? "text-gray-500" : "text-gray-400 group-hover:text-gray-500",
-                "mr-3 h-5 w-5 flex-shrink-0"
+                isActive
+                  ? "text-gray-500"
+                  : "text-gray-400 group-hover:text-gray-500",
+                "mr-3 h-5 w-5 flex-shrink-0",
               )}
               aria-hidden="true"
             />
