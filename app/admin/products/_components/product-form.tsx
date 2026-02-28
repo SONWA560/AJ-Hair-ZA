@@ -56,6 +56,7 @@ const empty: ProductFormData = {
   title: "",
   description: "",
   price: 0,
+  cost: 0,
   imageUrls: [""],
   hair_type: "",
   lace_type: "",
@@ -173,6 +174,16 @@ export function ProductForm({ mode, productId, defaultValues }: Props) {
               value={form.price}
               onChange={(e) => set("price", Number(e.target.value))}
               placeholder="2999"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="cost">Cost Price (rands) *</Label>
+            <Input
+              id="cost"
+              type="number"
+              value={form.cost}
+              onChange={(e) => set("cost", Number(e.target.value))}
+              placeholder="1500"
             />
           </div>
         </CardContent>

@@ -14,6 +14,7 @@ export interface ProductFormData {
   title: string;
   description: string;
   price: number;
+  cost: number;
   imageUrls: string[];
   // Specifications
   hair_type: string;
@@ -76,6 +77,7 @@ export async function createProduct(data: ProductFormData) {
     description: data.description,
     description_for_ai: data.description,
     price: Number(data.price),
+    cost: Number(data.cost) || 0,
     currency: "ZAR",
     images: data.imageUrls
       .filter(Boolean)
@@ -94,6 +96,7 @@ export async function createProduct(data: ProductFormData) {
     metadata: {
       occasion: [],
       trending_score: Number(data.trending_score) || 0,
+      views: 0,
       search_tags: [data.hair_type, data.color, data.length].filter(Boolean),
       suitable_face_shapes: [],
       maintenance_level: "medium",
@@ -137,6 +140,7 @@ export async function updateProduct(id: string, data: ProductFormData) {
       description: data.description,
       description_for_ai: data.description,
       price: Number(data.price),
+      cost: Number(data.cost) || 0,
       images: data.imageUrls
         .filter(Boolean)
         .map((url) => ({ url, alt: data.title, width: 800, height: 800 })),
@@ -189,6 +193,7 @@ export async function getProductForEdit(id: string) {
     title: data.title ?? "",
     description: data.description ?? "",
     price: data.price ?? 0,
+    cost: data.cost ?? 0,
     imageUrls: (data.images ?? []).map((img: any) => img.url),
     hair_type: data.specifications?.hair_type ?? "",
     lace_type: data.specifications?.lace_type ?? "",

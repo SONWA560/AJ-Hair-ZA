@@ -131,7 +131,7 @@ export async function placeOrder(orderData: {
       shipping: Number(orderData.shipping) || 0,
       total: Number(orderData.total) || 0,
       paymentMethod: String(orderData.paymentMethod || "card"),
-      status: "completed",
+      status: "pending",
       createdAt: new Date().toISOString(),
     };
 

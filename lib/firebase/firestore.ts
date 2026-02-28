@@ -623,3 +623,102 @@ export async function getProductsByHairType(
     return [];
   }
 }
+
+// Order operations for admin and customers
+export async function getAdminOrders(status?: string) {
+  try {
+    const db = getAdminDb();
+    let query: any = db.collection("orders").orderBy("createdAt", "desc");
+    if (status) {
+      query = db
+        .collection("orders")
+        .where("status", "==", status)
+        .orderBy("createdAt", "desc");
+    }
+    const snapshot = await query.get();
+    return snapshot.docs.map((doc: any) => ({
+      id: doc.id,
+      ...convertFirestoreData(doc.data()),
+    }));
+  } catch (error) {
+    console.error("Error fetching admin orders:", error);
+    // Fallback without ordering
+    try {
+      const db = getAdminDb();
+      const snapshot = status
+        ? await db.collection("orders").where("status", "==", status).get()
+        : await db.collection("orders").get();
+      const docs = snapshot.docs.map((doc: any) => ({
+        id: doc.id,
+        ...convertFirestoreData(doc.data()),
+      }));
+      return docs.sort((a: any, b: any) => {
+        const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bDate - aDate;
+      });
+    } catch {
+      return [];
+    }
+  }
+}
+
+export async function getOrdersByUserId(userId: string) {
+  try {
+    const db = getAdminDb();
+    const snapshot = await db
+      .collection("orders")
+      .where("userId", "==", userId)
+      .orderBy("createdAt", "desc")
+      .get();
+    return snapshot.docs.map((doc: any) => ({
+      id: doc.id,
+      ...convertFirestoreData(doc.data()),
+    }));
+  } catch (error) {
+    // Fallback without index
+    try {
+      const db = getAdminDb();
+      const snapshot = await db
+        .collection("orders")
+        .where("userId", "==", userId)
+        .get();
+      const docs = snapshot.docs.map((doc: any) => ({
+        id: doc.id,
+        ...convertFirestoreData(doc.data()),
+      }));
+      return docs.sort((a: any, b: any) => {
+        const aDate = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bDate = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bDate - aDate;
+      });
+    } catch {
+      return [];
+    }
+  }
+}
+
+export async function getReportData() {
+  try {
+    const db = getAdminDb();
+    const [ordersSnap, productsSnap] = await Promise.all([
+      db.collection("orders").get(),
+      db.collection("products").get(),
+    ]);
+
+    const orders = ordersSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...convertFirestoreData(doc.data()),
+    }));
+
+    const products = productsSnap.docs.map((doc: any) => ({
+      id: doc.id,
+      ...convertFirestoreData(doc.data()),
+    }));
+
+    return { orders, products };
+  } catch (error) {
+    console.error("Error fetching report data:", error);
+    return { orders: [], products: [] };
+  }
+}

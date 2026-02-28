@@ -19,6 +19,7 @@ export default function CheckoutPage() {
   const [checkoutStep, setCheckoutStep] = useState<"shipping" | "payment">(
     "shipping",
   );
+  const [paymentMethod, setPaymentMethod] = useState("card");
   const [shippingDetails, setShippingDetails] = useState({
     firstName: "",
     lastName: "",
@@ -144,7 +145,7 @@ export default function CheckoutPage() {
             ) * 0.15,
           ),
         shippingDetails: shippingDetails,
-        paymentMethod: "card",
+        paymentMethod: paymentMethod,
       });
 
       if (orderResult.success && orderResult.orderId) {
@@ -215,6 +216,8 @@ export default function CheckoutPage() {
             isProcessing={isProcessing}
             onPlaceOrder={handlePlaceOrder}
             onBack={() => setCheckoutStep("shipping")}
+            paymentMethod={paymentMethod}
+            setPaymentMethod={setPaymentMethod}
           />
         )}
       </div>
@@ -227,11 +230,15 @@ function PaymentStep({
   isProcessing,
   onPlaceOrder,
   onBack,
+  paymentMethod,
+  setPaymentMethod,
 }: {
   total: number;
   isProcessing: boolean;
   onPlaceOrder: () => void;
   onBack: () => void;
+  paymentMethod: string;
+  setPaymentMethod: (v: string) => void;
 }) {
   return (
     <div className="w-full max-w-6xl flex flex-col md:flex-row justify-between items-start gap-8">
@@ -240,53 +247,74 @@ function PaymentStep({
           <h3 className="text-lg font-semibold mb-4">Payment Method</h3>
 
           <div className="space-y-4 mb-6">
-            <label className="flex items-center justify-between rounded-lg border p-4 cursor-pointer border-gray-500 bg-gray-50">
-              <div className="flex items-center gap-3">
+            {[
+              { value: "card", label: "Credit / Debit Card" },
+              { value: "eft", label: "Instant EFT" },
+              { value: "cod", label: "Cash on Delivery" },
+              { value: "paypal", label: "PayPal" },
+            ].map(({ value, label }) => (
+              <label
+                key={value}
+                className={`flex items-center gap-3 rounded-lg border p-4 cursor-pointer transition-colors ${
+                  paymentMethod === value
+                    ? "border-blue-500 bg-blue-50"
+                    : "hover:bg-neutral-50"
+                }`}
+              >
                 <input
                   type="radio"
                   name="payment"
-                  value="card"
-                  defaultChecked
+                  value={value}
+                  checked={paymentMethod === value}
+                  onChange={() => setPaymentMethod(value)}
                   className="h-4 w-4"
                 />
-                <span className="font-medium">Credit / Debit Card</span>
-              </div>
-            </label>
-            <label className="flex items-center justify-between rounded-lg border p-4 cursor-pointer hover:bg-neutral-50">
-              <div className="flex items-center gap-3">
-                <input
-                  type="radio"
-                  name="payment"
-                  value="eft"
-                  className="h-4 w-4"
-                />
-                <span className="font-medium">Instant EFT</span>
-              </div>
-            </label>
+                <span className="font-medium">{label}</span>
+              </label>
+            ))}
           </div>
 
-          <div className="space-y-4 pt-4 border-t">
-            <div className="space-y-2">
-              <label htmlFor="cardNumber" className="text-sm font-medium">
-                Card Number
-              </label>
-              <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+          {paymentMethod === "card" && (
+            <div className="space-y-4 pt-4 border-t">
               <div className="space-y-2">
-                <label htmlFor="expiry" className="text-sm font-medium">
-                  Expiry Date
+                <label htmlFor="cardNumber" className="text-sm font-medium">
+                  Card Number
                 </label>
-                <Input id="expiry" placeholder="MM/YY" />
+                <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
               </div>
-              <div className="space-y-2">
-                <label htmlFor="cvc" className="text-sm font-medium">
-                  CVC
-                </label>
-                <Input id="cvc" placeholder="123" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="expiry" className="text-sm font-medium">
+                    Expiry Date
+                  </label>
+                  <Input id="expiry" placeholder="MM/YY" />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="cvc" className="text-sm font-medium">
+                    CVC
+                  </label>
+                  <Input id="cvc" placeholder="123" />
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {paymentMethod === "paypal" && (
+            <div className="pt-4 border-t">
+              <p className="text-sm text-muted-foreground">
+                You will be redirected to PayPal to complete your payment.
+              </p>
+            </div>
+          )}
+
+          {paymentMethod === "cod" && (
+            <div className="pt-4 border-t">
+              <p className="text-sm text-muted-foreground">
+                Pay when your order is delivered. Our driver will collect
+                payment on arrival.
+              </p>
+            </div>
+          )}
 
           <div className="flex gap-4 mt-6">
             <Button variant="outline" onClick={onBack} className="flex-1">

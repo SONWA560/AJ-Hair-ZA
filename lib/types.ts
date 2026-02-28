@@ -30,6 +30,7 @@ export interface Product {
   description: string;
   description_for_ai: string;
   price: number;
+  cost: number;
   currency: string;
   images: {
     url: string;
@@ -51,6 +52,7 @@ export interface Product {
   metadata: {
     occasion: string[];     // ["daily", "professional", "wedding", "party", "protective"]
     trending_score: number; // 1-10 popularity score
+    views: number;
     search_tags: string[];
     suitable_face_shapes: string[]; // ["round", "oval", "square", "heart"]
     maintenance_level: "low" | "medium" | "high";
