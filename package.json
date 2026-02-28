@@ -1,9 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "prebuild": "npm install --legacy-peer-deps",
     "dev": "next dev",
-    "build": "npm install --legacy-peer-deps && next build --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "prettier": "prettier --write --ignore-unknown .",
     "prettier:check": "prettier --check --ignore-unknown .",
