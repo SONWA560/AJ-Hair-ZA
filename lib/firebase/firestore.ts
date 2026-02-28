@@ -1,5 +1,5 @@
-import { getAdminDb, getAdminStorage } from "./admin";
-import { Product, ProductFilters, Cart, CartItem } from "../types";
+import { Cart, CartItem, Product, ProductFilters } from "../types";
+import { getAdminDb } from "./admin";
 
 // Helper function to convert Firestore data to serializable plain objects
 function convertFirestoreData(data: any): any {
@@ -88,6 +88,9 @@ export async function getProducts(
     });
   } catch (error) {
     console.error("Error fetching products:", error);
+    if (filters) {
+      return getFilteredProducts(filters);
+    }
     return [];
   }
 }
@@ -517,10 +520,10 @@ export async function logSearchQuery(
     const db = getAdminDb();
     await db.collection(COLLECTIONS.SEARCH_LOGS).add({
       query,
-      userId,
+      ...(userId !== undefined ? { userId } : {}),
       filters,
       timestamp: new Date(),
-      location: "Johannesburg", // Default location
+      location: "Johannesburg",
     });
   } catch (error) {
     console.error("Error logging search query:", error);

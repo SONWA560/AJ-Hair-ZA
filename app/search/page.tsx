@@ -1,6 +1,7 @@
 import Grid from "components/grid";
 import ProductGridItems from "components/layout/product-grid-items";
-import { getProducts, searchProducts } from "lib/firebase/firestore";
+import { getProducts } from "lib/firebase/firestore";
+import { aiSearch } from "lib/search";
 
 export const metadata = {
   title: "Search",
@@ -14,21 +15,35 @@ export default async function SearchPage(props: {
   const { q: searchValue } = searchParams as { [key: string]: string };
 
   let products;
+  let aiInterpretation: string | undefined;
+
   if (searchValue && searchValue.trim()) {
-    products = await searchProducts(searchValue.trim());
+    const result = await aiSearch(searchValue.trim());
+    products = result.products;
+    aiInterpretation = result.aiInterpretation;
   } else {
     products = await getProducts();
   }
+
   const resultsText = products.length > 1 ? "results" : "result";
 
   return (
     <>
       {searchValue ? (
         <p className="mb-4">
-          {products.length === 0
-            ? "There are no products that match "
-            : `Showing ${products.length} ${resultsText} for `}
-          <span className="font-bold">&quot;{searchValue}&quot;</span>
+          {products.length === 0 ? (
+            <>
+              There are no products that match{" "}
+              <span className="font-bold">&quot;{searchValue}&quot;</span>
+            </>
+          ) : aiInterpretation ? (
+            <span className="text-muted-foreground">{aiInterpretation}</span>
+          ) : (
+            <>
+              {`Showing ${products.length} ${resultsText} for `}
+              <span className="font-bold">&quot;{searchValue}&quot;</span>
+            </>
+          )}
         </p>
       ) : null}
       {products.length > 0 ? (
