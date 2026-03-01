@@ -6,8 +6,9 @@ import {
     SignInButton,
     SignUpButton,
     UserButton,
+    useAuth,
 } from "@clerk/nextjs";
-import { Heart, User } from "lucide-react";
+import { Heart, LayoutDashboard, User } from "lucide-react";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
 
@@ -21,6 +22,7 @@ function useHydrated() {
 
 export function AuthButtons() {
   const isHydrated = useHydrated();
+  const { orgId } = useAuth();
 
   if (!isHydrated) {
     return (
@@ -45,6 +47,15 @@ export function AuthButtons() {
         </SignUpButton>
       </SignedOut>
       <SignedIn>
+        {orgId && (
+          <Link
+            href="/admin"
+            aria-label="Admin Dashboard"
+            className="text-neutral-500 transition-colors hover:text-black dark:text-neutral-400 dark:hover:text-white"
+          >
+            <LayoutDashboard size={20} />
+          </Link>
+        )}
         <Link
           href="/account/wishlist"
           aria-label="Wishlist"
