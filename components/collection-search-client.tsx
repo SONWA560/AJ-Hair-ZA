@@ -1,27 +1,20 @@
 "use client"
 
-import { useState, useTransition, useCallback, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
-import Image from "next/image"
+import { useCallback, useEffect, useState, useTransition } from "react"
+import { SlidersHorizontal, X } from "lucide-react"
 
+import { Breadcrumb } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
-import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Breadcrumb } from "@/components/ui/breadcrumb"
-import type { Product, ProductFilters } from "@/lib/types"
 import { filterProducts } from "@/lib/actions"
+import type { Product, ProductFilters } from "@/lib/types"
+import { cn } from "@/lib/utils"
+import Grid from "components/grid"
+import ProductGridItems from "components/layout/product-grid-items"
 
 const hairTypes = [
   { value: "kinky_curly", label: "Kinky Curly" },
@@ -60,14 +53,6 @@ const laceTypes = [
   "4x4 Closure"
 ]
 
-const sortFilters = [
-  { key: "featured", name: "Featured" },
-  { key: "best_selling", name: "Best Selling" },
-  { key: "price_low_high", name: "Price: Low to High" },
-  { key: "price_high_low", name: "Price: High to Low" },
-  { key: "newest", name: "Newest Arrivals" }
-]
-
 const minPrice = 0
 const maxPrice = 10000
 
@@ -82,11 +67,12 @@ export function CollectionSearchClient({
 }: CollectionSearchClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  
+
   const [products, setProducts] = useState<Product[]>(initialProducts)
   const [isPending, startTransition] = useTransition()
   const [isLoading, setIsLoading] = useState(false)
-  
+  const [filtersOpen, setFiltersOpen] = useState(false)
+
   const [search, setSearch] = useState(searchParams.get("q") || "")
   const [selectedHairTypes, setSelectedHairTypes] = useState<string[]>(
     searchParams.get("hair_type")?.split(",").filter(Boolean) || []
@@ -117,7 +103,7 @@ export function CollectionSearchClient({
     setIsLoading(true)
     try {
       const filters: ProductFilters = {}
-      
+
       if (search) filters.search = search
       if (selectedHairTypes.length > 0) filters.hair_type = selectedHairTypes
       if (selectedLengths.length > 0) filters.length = selectedLengths
@@ -127,7 +113,7 @@ export function CollectionSearchClient({
       if (priceRange[0] > minPrice) filters.price_min = priceRange[0]
       if (priceRange[1] < maxPrice) filters.price_max = priceRange[1]
       filters.sortBy = sortBy as ProductFilters["sortBy"]
-      
+
       const result = await filterProducts(collection, filters)
       setProducts(result.products)
     } catch (error) {
@@ -139,7 +125,6 @@ export function CollectionSearchClient({
 
   const handleFilterChange = () => {
     startTransition(async () => {
-      // Update URL params
       const params = new URLSearchParams()
       if (search) params.set("q", search)
       if (selectedHairTypes.length) params.set("hair_type", selectedHairTypes.join(","))
@@ -150,10 +135,9 @@ export function CollectionSearchClient({
       if (priceRange[0] > minPrice) params.set("price_min", priceRange[0].toString())
       if (priceRange[1] < maxPrice) params.set("price_max", priceRange[1].toString())
       if (sortBy !== "featured") params.set("sort", sortBy)
-      
+
       router.push(`/search/${collection}?${params}`, { scroll: false })
-      
-      // Fetch filtered products from server
+
       await fetchFilteredProducts()
     })
   }
@@ -164,6 +148,7 @@ export function CollectionSearchClient({
     if (hasFilters) {
       fetchFilteredProducts()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const toggleFilter = (
@@ -183,25 +168,70 @@ export function CollectionSearchClient({
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ")
 
+  // suppress unused warning — sortBy setter kept for future sort UI
+  void setSortBy
+  void isPending
+
   return (
     <section className="py-10 lg:py-20">
       <div className="container mx-auto px-4">
         <div className="mb-6">
-          <Breadcrumb 
+          <Breadcrumb
             items={[
               { title: "Home", href: "/" },
               { title: collectionTitle }
-            ]} 
+            ]}
           />
         </div>
 
         <div className="mb-6">
           <h2 className="font-heading text-2xl lg:text-3xl">{collectionTitle}</h2>
         </div>
-        
-        <div className="grid grid-cols-[240px_1fr] gap-8">
-          {/* Filters Sidebar */}
-          <div className="space-y-8">
+
+        {/* Mobile filter toggle button — hidden on md+ */}
+        <div className="mb-4 md:hidden">
+          <Button
+            variant="outline"
+            onClick={() => setFiltersOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            Filters
+          </Button>
+        </div>
+
+        {/* Mobile backdrop */}
+        {filtersOpen && (
+          <div
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={() => setFiltersOpen(false)}
+          />
+        )}
+
+        <div className="md:grid md:grid-cols-[240px_1fr] md:gap-8">
+          {/* Filters — slide-in drawer on mobile, static sidebar on md+ */}
+          <div
+            className={cn(
+              // Mobile: fixed drawer sliding in from the left
+              "fixed left-0 top-0 z-50 h-full w-72 overflow-y-auto bg-white p-6 shadow-xl transition-transform duration-300 ease-in-out dark:bg-neutral-900",
+              filtersOpen ? "translate-x-0" : "-translate-x-full",
+              // Desktop: reset to normal document flow
+              "md:relative md:top-auto md:z-auto md:h-auto md:w-auto md:translate-x-0 md:overflow-visible md:bg-transparent md:p-0 md:shadow-none md:dark:bg-transparent",
+              "space-y-8"
+            )}
+          >
+            {/* Drawer header with close button — mobile only */}
+            <div className="flex items-center justify-between md:hidden">
+              <span className="text-sm font-semibold">Filters</span>
+              <button
+                onClick={() => setFiltersOpen(false)}
+                className="rounded-md p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                aria-label="Close filters"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
             {/* Keywords Filter */}
             <div className="space-y-4">
               <div className="text-muted-foreground text-[11px] font-semibold tracking-widest uppercase">
@@ -369,47 +399,13 @@ export function CollectionSearchClient({
                 <p className="text-sm text-muted-foreground mt-2">Try adjusting your filters</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-                {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              <Grid className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                <ProductGridItems products={products} />
+              </Grid>
             )}
           </div>
         </div>
       </div>
     </section>
-  )
-}
-
-function ProductCard({ product }: { product: Product }) {
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-ZA", {
-      style: "currency",
-      currency: "ZAR",
-    }).format(price)
-  }
-
-  return (
-    <Link href={`/product/${product.seo.handle}`} className="group">
-      <figure className="relative aspect-9/16 w-full overflow-hidden object-cover">
-        <Image
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-          src={product.images[0]?.url || "/images/placeholder-product.jpg"}
-          alt={product.title}
-          sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-        />
-        {product.metadata?.new_arrival && (
-          <Badge className="absolute left-2 top-2" variant="secondary">
-            New
-          </Badge>
-        )}
-      </figure>
-      <div className="mt-3 space-y-1">
-        <p className="font-medium truncate">{product.title}</p>
-        <p className="text-muted-foreground">{formatPrice(product.price)}</p>
-      </div>
-    </Link>
   )
 }

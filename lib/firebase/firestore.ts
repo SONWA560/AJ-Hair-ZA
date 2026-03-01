@@ -79,13 +79,18 @@ export async function getProducts(
 
   try {
     const snapshot = await query.get();
-    return snapshot.docs.map((doc: any) => {
+    const results = snapshot.docs.map((doc: any) => {
       const data = doc.data();
       return convertFirestoreData({
         id: doc.id,
         ...data,
       }) as Product;
     });
+    // Strict query returned nothing — retry with fuzzy in-memory matching
+    if (results.length === 0 && filters && Object.keys(filters).length > 0) {
+      return getFilteredProducts(filters);
+    }
+    return results;
   } catch (error) {
     console.error("Error fetching products:", error);
     if (filters) {
@@ -100,16 +105,7 @@ async function getFilteredProducts(filters: ProductFilters): Promise<Product[]> 
   const db = getAdminDb();
   let query: any = db.collection(COLLECTIONS.PRODUCTS);
 
-  // Apply single-value filters that can use indexes
-  if (filters?.length && !Array.isArray(filters.length)) {
-    query = query.where("specifications.length", "==", filters.length);
-  }
-  if (filters?.color && !Array.isArray(filters.color)) {
-    query = query.where("specifications.color", "==", filters.color);
-  }
-  if (filters?.density && !Array.isArray(filters.density)) {
-    query = query.where("specifications.density", "==", filters.density);
-  }
+  // Only apply boolean inStock filter at query level — string filters use in-memory fuzzy matching
   if (filters?.inStock !== undefined) {
     query = query.where("inventory.inStock", "==", filters.inStock);
   }
@@ -135,43 +131,70 @@ async function getFilteredProducts(filters: ProductFilters): Promise<Product[]> 
       }) as Product;
     });
 
-    // Apply in-memory filters for multi-value filters
-    if (filters?.hair_type && Array.isArray(filters.hair_type) && filters.hair_type.length > 0) {
-      products = products.filter((p: Product) => 
-        filters.hair_type!.includes(p.specifications?.hair_type)
-      );
-    }
-
     // Helper function to normalize length for comparison (e.g., "8in", "8inch", "8"", "8" all should match)
     function normalizeLength(value: string): string {
       if (!value) return "";
-      // Remove quotes, inch, in, and convert to number
       return value.toLowerCase().replace(/["'\s]/g, "").replace(/inch/g, "").replace(/in$/g, "");
     }
 
-    const filterLengths = Array.isArray(filters?.length) ? filters.length : [];
-    if (filterLengths.length > 0) {
-      products = products.filter((p: Product) => {
-        const productLength = normalizeLength(p.specifications?.length || "");
-        return filterLengths.some((f) => normalizeLength(f) === productLength);
-      });
+    // Apply in-memory filters — handles both single-value and array values with fuzzy matching
+    if (filters?.hair_type) {
+      if (Array.isArray(filters.hair_type) && filters.hair_type.length > 0) {
+        products = products.filter((p: Product) =>
+          filters.hair_type!.includes(p.specifications?.hair_type)
+        );
+      } else if (typeof filters.hair_type === "string") {
+        products = products.filter((p: Product) =>
+          p.specifications?.hair_type === filters.hair_type
+        );
+      }
     }
 
-    const filterColors = Array.isArray(filters?.color) ? filters.color : [];
-    if (filterColors.length > 0) {
-      products = products.filter((p: Product) => 
-        filterColors.some((c) => 
-          p.specifications?.color?.toLowerCase().includes(c.toLowerCase()) ||
-          c.toLowerCase().includes(p.specifications?.color?.toLowerCase() || "")
-        )
-      );
+    if (filters?.length) {
+      if (Array.isArray(filters.length) && filters.length.length > 0) {
+        products = products.filter((p: Product) => {
+          const productLength = normalizeLength(p.specifications?.length || "");
+          return (filters.length as string[]).some((f) => normalizeLength(f) === productLength);
+        });
+      } else if (typeof filters.length === "string") {
+        products = products.filter((p: Product) =>
+          normalizeLength(p.specifications?.length || "") === normalizeLength(filters.length as string)
+        );
+      }
     }
 
-    const filterDensities = Array.isArray(filters?.density) ? filters.density : [];
-    if (filterDensities.length > 0) {
-      products = products.filter((p: Product) => 
-        filterDensities.includes(p.specifications?.density)
-      );
+    if (filters?.color) {
+      // Word-level matching: "Jet Black" matches "Natural Black" because both contain "black"
+      function colorMatches(productColor: string, filterColor: string): boolean {
+        const pWords = productColor.toLowerCase().split(/\s+/).filter(Boolean);
+        const fWords = filterColor.toLowerCase().split(/\s+/).filter(Boolean);
+        return fWords.some((fw) => pWords.some((pw) => pw.includes(fw) || fw.includes(pw)));
+      }
+
+      if (Array.isArray(filters.color) && filters.color.length > 0) {
+        products = products.filter((p: Product) =>
+          (filters.color as string[]).some((c) =>
+            colorMatches(p.specifications?.color || "", c)
+          )
+        );
+      } else if (typeof filters.color === "string") {
+        const filterColor = filters.color;
+        products = products.filter((p: Product) =>
+          colorMatches(p.specifications?.color || "", filterColor)
+        );
+      }
+    }
+
+    if (filters?.density) {
+      if (Array.isArray(filters.density) && filters.density.length > 0) {
+        products = products.filter((p: Product) =>
+          (filters.density as string[]).includes(p.specifications?.density)
+        );
+      } else if (typeof filters.density === "string") {
+        products = products.filter((p: Product) =>
+          p.specifications?.density === filters.density
+        );
+      }
     }
 
     const filterLaceTypes = Array.isArray(filters?.lace_type) ? filters.lace_type : [];
@@ -660,6 +683,18 @@ export async function getAdminOrders(status?: string) {
     } catch {
       return [];
     }
+  }
+}
+
+export async function getAdminOrderById(orderId: string) {
+  try {
+    const db = getAdminDb();
+    const doc = await db.collection("orders").doc(orderId).get();
+    if (!doc.exists) return null;
+    return { id: doc.id, ...convertFirestoreData(doc.data()!) };
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    return null;
   }
 }
 

@@ -31,6 +31,7 @@ export interface ProductFormData {
   featured: boolean;
   new_arrival: boolean;
   trending_score: number;
+  tags: string[];
   // SEO
   seo_handle: string;
   seo_title: string;
@@ -97,7 +98,7 @@ export async function createProduct(data: ProductFormData) {
       occasion: [],
       trending_score: Number(data.trending_score) || 0,
       views: 0,
-      search_tags: [data.hair_type, data.color, data.length].filter(Boolean),
+      search_tags: [...(data.tags ?? []), data.hair_type, data.color, data.length].filter(Boolean),
       suitable_face_shapes: [],
       maintenance_level: "medium",
       featured: data.featured,
@@ -156,7 +157,7 @@ export async function updateProduct(id: string, data: ProductFormData) {
       "metadata.trending_score": Number(data.trending_score) || 0,
       "metadata.featured": data.featured,
       "metadata.new_arrival": data.new_arrival,
-      "metadata.search_tags": [data.hair_type, data.color, data.length].filter(
+      "metadata.search_tags": [...(data.tags ?? []), data.hair_type, data.color, data.length].filter(
         Boolean,
       ),
       "inventory.inStock": data.inStock,
@@ -207,6 +208,9 @@ export async function getProductForEdit(id: string) {
     featured: data.metadata?.featured ?? false,
     new_arrival: data.metadata?.new_arrival ?? false,
     trending_score: data.metadata?.trending_score ?? 0,
+    tags: (data.metadata?.search_tags ?? []).filter(
+      (t: string) => t !== data.specifications?.hair_type && t !== data.specifications?.color && t !== data.specifications?.length
+    ),
     seo_handle: data.seo?.handle ?? "",
     seo_title: data.seo?.title ?? "",
     seo_description: data.seo?.description ?? "",

@@ -2,11 +2,12 @@
 
 import { cn } from "@/lib/utils";
 import {
-  BarChart3,
-  LayoutDashboard,
-  Menu,
-  Package,
-  ShoppingCart,
+    BarChart3,
+    FolderOpen,
+    LayoutDashboard,
+    Menu,
+    Package,
+    ShoppingCart,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -15,6 +16,7 @@ import { useState } from "react";
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { name: "Products", href: "/admin/products", icon: Package },
+  { name: "Collections", href: "/admin/collections", icon: FolderOpen },
   { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
   { name: "Reports", href: "/admin/reports", icon: BarChart3 },
 ];

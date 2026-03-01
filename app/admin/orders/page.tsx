@@ -1,17 +1,17 @@
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "@/components/ui/table";
 import { getAdminOrders } from "@/lib/firebase/firestore";
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { OrderStatusSelect } from "./_components/order-status-select";
 
 const PAYMENT_LABELS: Record<string, string> = {
   card: "Card",
@@ -98,6 +98,16 @@ export default async function AdminOrdersPage({
             status: "pending",
           },
           {
+            label: "Processing",
+            href: "/admin/orders?status=processing",
+            status: "processing",
+          },
+          {
+            label: "Shipped",
+            href: "/admin/orders?status=shipped",
+            status: "shipped",
+          },
+          {
             label: "Completed",
             href: "/admin/orders?status=completed",
             status: "completed",
@@ -142,19 +152,24 @@ export default async function AdminOrdersPage({
               </TableHeader>
               <TableBody>
                 {orders.map((order) => (
-                  <TableRow key={order.id}>
+                  <TableRow key={order.id} className="group">
                     <TableCell className="font-mono text-xs text-muted-foreground">
-                      {order.id.slice(0, 8)}…
+                      <Link
+                        href={`/admin/orders/${order.id}`}
+                        className="hover:underline"
+                      >
+                        {order.id.slice(0, 8)}…
+                      </Link>
                     </TableCell>
                     <TableCell>
-                      <div>
+                      <Link href={`/admin/orders/${order.id}`} className="block">
                         <p className="text-sm font-medium">
                           {order.customerName || "Guest"}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {order.customerEmail || ""}
                         </p>
-                      </div>
+                      </Link>
                     </TableCell>
                     <TableCell>{order.items?.length ?? 0}</TableCell>
                     <TableCell className="text-sm">
@@ -170,15 +185,10 @@ export default async function AdminOrdersPage({
                       }).format(order.total || 0)}
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        className={
-                          order.status === "completed"
-                            ? "bg-green-100 text-green-800 hover:bg-green-100"
-                            : "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-                        }
-                      >
-                        {order.status ?? "unknown"}
-                      </Badge>
+                      <OrderStatusSelect
+                        orderId={order.id}
+                        currentStatus={order.status ?? "pending"}
+                      />
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {order.createdAt

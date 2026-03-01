@@ -94,23 +94,52 @@ export async function aiSearch(query: string): Promise<AiSearchResult> {
 
       const products = await getProducts(cleanFilters);
 
+      // If no results, progressively relax filters:
+      // 1. Drop color (most likely to mismatch due to naming differences)
+      // 2. Drop color + length
+      // 3. Drop everything except hair_type
+      let finalProducts = products;
+      let finalFilters = cleanFilters;
+
+      if (finalProducts.length === 0 && Object.keys(cleanFilters).length > 1) {
+        const noColor = Object.fromEntries(
+          Object.entries(cleanFilters).filter(([k]) => k !== "color"),
+        );
+        finalProducts = await getProducts(noColor);
+        finalFilters = noColor;
+      }
+
+      if (finalProducts.length === 0 && Object.keys(cleanFilters).length > 1) {
+        const noColorLength = Object.fromEntries(
+          Object.entries(cleanFilters).filter(([k]) => k !== "color" && k !== "length"),
+        );
+        finalProducts = await getProducts(noColorLength);
+        finalFilters = noColorLength;
+      }
+
+      if (finalProducts.length === 0 && cleanFilters.hair_type) {
+        const typeOnly = { hair_type: cleanFilters.hair_type };
+        finalProducts = await getProducts(typeOnly);
+        finalFilters = typeOnly;
+      }
+
       await logSearchQuery(query, undefined, {
-        aiFilters: cleanFilters,
-        resultsCount: products.length,
+        aiFilters: finalFilters,
+        resultsCount: finalProducts.length,
       });
 
-      const aiInterpretation = buildInterpretation(cleanFilters);
+      const aiInterpretation = buildInterpretation(finalFilters);
 
       const suggestions: string[] = [];
-      if (products.length === 0) {
+      if (finalProducts.length === 0) {
         suggestions.push("Try using fewer filters");
         suggestions.push("Browse our collections");
-      } else if (products.length < 5) {
+      } else if (finalProducts.length < 5) {
         suggestions.push("Try searching with fewer specifications");
       }
 
       return {
-        products,
+        products: finalProducts,
         aiInterpretation,
         suggestions: suggestions.length > 0 ? suggestions : undefined,
       };

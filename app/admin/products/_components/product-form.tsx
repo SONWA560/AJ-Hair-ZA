@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { createProduct, updateProduct, type ProductFormData } from "@/lib/product-actions";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
@@ -70,6 +70,7 @@ const empty: ProductFormData = {
   featured: false,
   new_arrival: false,
   trending_score: 0,
+  tags: [],
   seo_handle: "",
   seo_title: "",
   seo_description: "",
@@ -83,6 +84,7 @@ export function ProductForm({ mode, productId, defaultValues }: Props) {
     ...defaultValues,
   });
   const [error, setError] = useState("");
+  const [tagInput, setTagInput] = useState("");
 
   function set<K extends keyof ProductFormData>(key: K, value: ProductFormData[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -103,6 +105,29 @@ export function ProductForm({ mode, productId, defaultValues }: Props) {
       "imageUrls",
       form.imageUrls.filter((_, i) => i !== index),
     );
+  }
+
+  function addTag() {
+    const tag = tagInput.trim().toLowerCase();
+    if (!tag) return;
+    const existing = form.tags ?? [];
+    if (existing.includes(tag)) {
+      setTagInput("");
+      return;
+    }
+    set("tags", [...existing, tag]);
+    setTagInput("");
+  }
+
+  function removeTag(index: number) {
+    set("tags", (form.tags ?? []).filter((_, i) => i !== index));
+  }
+
+  function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addTag();
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -399,6 +424,44 @@ export function ProductForm({ mode, productId, defaultValues }: Props) {
               value={form.trending_score}
               onChange={(e) => set("trending_score", Number(e.target.value))}
             />
+          </div>
+          <Separator />
+          <div className="space-y-2">
+            <Label>Search Tags</Label>
+            <p className="text-xs text-muted-foreground">
+              Add custom tags to improve search discoverability. Press Enter or comma to add.
+            </p>
+            {(form.tags ?? []).length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {(form.tags ?? []).map((tag, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800"
+                  >
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => removeTag(i)}
+                      className="ml-1 rounded-full hover:bg-blue-200"
+                      aria-label={`Remove tag ${tag}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                placeholder="e.g. wedding, protective style, 613…"
+              />
+              <Button type="button" variant="outline" size="sm" onClick={addTag}>
+                Add
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

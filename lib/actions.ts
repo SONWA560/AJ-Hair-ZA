@@ -1,7 +1,7 @@
 "use server";
 
-import { getAdminDb } from "@/lib/firebase/admin";
 import { sendOrderConfirmationEmail } from "@/lib/email";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { getProducts } from "@/lib/firebase/firestore";
 import { ProductFilters } from "@/lib/types";
 import { auth } from "@clerk/nextjs/server";
@@ -109,6 +109,26 @@ export async function placeOrder(orderData: {
       })
       .filter((item) => item.productId && item.productId !== "");
 
+    // Stock validation — check availability before creating the order
+    const outOfStockTitles: string[] = [];
+    for (const item of sanitizedItems) {
+      const productDoc = await db
+        .collection("products")
+        .doc(item.productId)
+        .get();
+      if (!productDoc.exists) continue;
+      const inv = productDoc.data()?.inventory;
+      if (!inv?.inStock || (inv?.quantity ?? 0) < item.quantity) {
+        outOfStockTitles.push(item.title);
+      }
+    }
+    if (outOfStockTitles.length > 0) {
+      return {
+        success: false,
+        error: `The following item(s) are no longer available: ${outOfStockTitles.join(", ")}. Please update your cart.`,
+      };
+    }
+
     const order = {
       userId: userId || "guest",
       customerName:
@@ -199,58 +219,46 @@ export async function completeOrder(orderId: string) {
   try {
     const db = getAdminDb();
 
-    // Fetch the order to get the items
     const orderDoc = await db.collection("orders").doc(orderId).get();
-
     if (!orderDoc.exists) {
       throw new Error("Order not found");
     }
 
-    const orderData = orderDoc.data();
-    const orderItems = orderData?.items || [];
-
-    // Decrease inventory for each product in the order
-    for (const item of orderItems) {
-      const productId = item.productId;
-      const quantityOrdered = item.quantity;
-
-      if (!productId) continue;
-
-      const productRef = db.collection("products").doc(productId.toString());
-      const productDoc = await productRef.get();
-
-      if (!productDoc.exists) {
-        console.warn(
-          `Product ${productId} not found, skipping inventory update`,
-        );
-        continue;
-      }
-
-      const productData = productDoc.data();
-      const currentQuantity = productData?.inventory?.quantity || 0;
-      const newQuantity = Math.max(0, currentQuantity - quantityOrdered);
-      const newInStock = newQuantity > 0;
-
-      await productRef.update({
-        "inventory.quantity": newQuantity,
-        "inventory.inStock": newInStock,
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-
-      console.log(
-        `Updated inventory for product ${productId}: ${currentQuantity} -> ${newQuantity} (inStock: ${newInStock})`,
-      );
-    }
-
-    // Update order status to completed
+    // Update order status to completed — inventory was already decreased at purchase time
     await db.collection("orders").doc(orderId).update({
       status: "completed",
       updatedAt: FieldValue.serverTimestamp(),
     });
 
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/admin/orders");
     return { success: true };
   } catch (error) {
     console.error("Error completing order:", error);
     return { success: false, error: "Failed to complete order" };
+  }
+}
+
+export async function updateOrderStatus(
+  orderId: string,
+  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled",
+) {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const db = getAdminDb();
+    await db.collection("orders").doc(orderId).update({
+      status,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/admin/orders");
+    revalidatePath(`/admin/orders/${orderId}`);
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    return { success: false, error: "Failed to update order status" };
   }
 }

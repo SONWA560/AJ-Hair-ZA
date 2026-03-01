@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import Image from "next/image"
+import Link from "next/link"
 
 interface Feature1Props {
   title: string
@@ -28,7 +28,7 @@ export function Feature1({
   },
   buttonSecondary = {
     label: "Learn More",
-    href: "/about",
+    href: "/search",
   },
 }: Feature1Props) {
   return (

@@ -16,6 +16,7 @@ export default function CheckoutPage() {
   const { userId, isLoaded } = useAuth();
   const { cart, clearCart } = useCart();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [orderError, setOrderError] = useState<string | null>(null);
   const [checkoutStep, setCheckoutStep] = useState<"shipping" | "payment">(
     "shipping",
   );
@@ -109,9 +110,9 @@ export default function CheckoutPage() {
 
   const handlePlaceOrder = async () => {
     setIsProcessing(true);
+    setOrderError(null);
 
     try {
-      // Save order to Firestore
       const orderResult = await placeOrder({
         items: cart.items.map((item: any) => ({
           id: item.id,
@@ -148,22 +149,23 @@ export default function CheckoutPage() {
         paymentMethod: paymentMethod,
       });
 
-      if (orderResult.success && orderResult.orderId) {
-        // Complete the order (simulate payment success)
+      if (!orderResult.success) {
+        setOrderError(orderResult.error ?? "Failed to place order. Please try again.");
+        setIsProcessing(false);
+        return;
+      }
+
+      if (orderResult.orderId) {
         await completeOrder(orderResult.orderId);
       }
 
-      // Simulate processing delay
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Clear cart and redirect to success
       clearCart();
       router.push("/checkout/success");
     } catch (error) {
       console.error("Error placing order:", error);
-      // Still redirect to success for demo purposes
-      clearCart();
-      router.push("/checkout/success");
+      setOrderError("Something went wrong. Please try again.");
+      setIsProcessing(false);
     }
   };
 
@@ -214,6 +216,7 @@ export default function CheckoutPage() {
           <PaymentStep
             total={total}
             isProcessing={isProcessing}
+            orderError={orderError}
             onPlaceOrder={handlePlaceOrder}
             onBack={() => setCheckoutStep("shipping")}
             paymentMethod={paymentMethod}
@@ -228,6 +231,7 @@ export default function CheckoutPage() {
 function PaymentStep({
   total,
   isProcessing,
+  orderError,
   onPlaceOrder,
   onBack,
   paymentMethod,
@@ -235,6 +239,7 @@ function PaymentStep({
 }: {
   total: number;
   isProcessing: boolean;
+  orderError: string | null;
   onPlaceOrder: () => void;
   onBack: () => void;
   paymentMethod: string;
@@ -245,6 +250,12 @@ function PaymentStep({
       <div className="w-full order-2 md:order-1">
         <div className="bg-white p-6 rounded-xl border">
           <h3 className="text-lg font-semibold mb-4">Payment Method</h3>
+
+          {orderError && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {orderError}
+            </div>
+          )}
 
           <div className="space-y-4 mb-6">
             {[

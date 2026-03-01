@@ -164,6 +164,7 @@ export default async function AccountPage() {
                       <TableHead>Total</TableHead>
                       <TableHead>Payment</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -194,6 +195,14 @@ export default async function AccountPage() {
                         </TableCell>
                         <TableCell>
                           <StatusBadge status={order.status ?? "pending"} />
+                        </TableCell>
+                        <TableCell>
+                          <Link
+                            href={`/account/orders/${order.id}`}
+                            className="text-xs font-medium text-blue-600 hover:underline"
+                          >
+                            View
+                          </Link>
                         </TableCell>
                       </TableRow>
                     ))}

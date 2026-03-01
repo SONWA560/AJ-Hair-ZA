@@ -5,8 +5,8 @@ import {
     SignedOut,
     SignInButton,
     SignUpButton,
+    useOrganizationList,
     UserButton,
-    useAuth,
 } from "@clerk/nextjs";
 import { Heart, LayoutDashboard, User } from "lucide-react";
 import Link from "next/link";
@@ -22,7 +22,11 @@ function useHydrated() {
 
 export function AuthButtons() {
   const isHydrated = useHydrated();
-  const { orgId } = useAuth();
+  const { userMemberships } = useOrganizationList({ userMemberships: true });
+
+  const isAdminOrgMember = userMemberships?.data?.some(
+    (m) => m.organization.id === process.env.NEXT_PUBLIC_ADMIN_ORG_ID
+  ) ?? false;
 
   if (!isHydrated) {
     return (
@@ -47,7 +51,7 @@ export function AuthButtons() {
         </SignUpButton>
       </SignedOut>
       <SignedIn>
-        {orgId && (
+        {isAdminOrgMember && (
           <Link
             href="/admin"
             aria-label="Admin Dashboard"

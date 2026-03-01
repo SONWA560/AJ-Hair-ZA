@@ -1,7 +1,9 @@
-import Footer from "components/layout/footer";
-import { PromoBannerThree } from "components/commercn/promo-banners/promo-banner-03";
-import CategoryPreviews from "components/category-previews-01";
+import TrendingProducts from "@/components/trending-products";
 import { Feature1 } from "@/components/ui/feature-1";
+import CategoryPreviews from "components/category-previews-01";
+import { PromoBannerThree } from "components/commercn/promo-banners/promo-banner-03";
+import Footer from "components/layout/footer";
+import { Suspense } from "react";
 
 export const metadata = {
   description:
@@ -16,12 +18,15 @@ export default function HomePage() {
   return (
     <>
       <PromoBannerThree />
-      <Feature1 
+      <Feature1
         title="AJ Hair ZA"
         description="Discover our premium collection of natural-looking wigs. Quality hair products crafted for confidence and comfort."
         imageSrc="/images/AJ.png"
         imageAlt="AJ Hair ZA - Premium Wigs South Africa"
       />
+      <Suspense>
+        <TrendingProducts />
+      </Suspense>
       <CategoryPreviews />
       <Footer />
     </>

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AJ Hair ZA — System Architecture</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding: 40px 24px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #f0f6fc;
+    }
+    header p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #8b949e;
+    }
+    .diagram-wrapper {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 32px;
+      overflow: auto;
+      max-width: 100%;
+    }
+    .diagram-wrapper svg {
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+    }
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 12px;
+      color: #484f58;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AJ Hair ZA — System Architecture</h1>
+    <p>Next.js 15 · Firebase · Clerk · OpenAI · Resend</p>
+  </header>
+  <div class="diagram-wrapper">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3887.4925833333327 2544.7853333333333" width="3887.4925833333327" height="2544.7853333333333" style="--bg:#0d1117;--fg:#e6edf3;--line:#3d444d;--accent:#4493f8;--muted:#9198a1;background:var(--bg)">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap');
+  text { font-family: 'Inter', system-ui, sans-serif; }
+  svg {
+    /* Derived from --bg and --fg (overridable via --line, --accent, etc.) */
+    --_text:          var(--fg);
+    --_text-sec:      var(--muted, color-mix(in srgb, var(--fg) 60%, var(--bg)));
+    --_text-muted:    var(--muted, color-mix(in srgb, var(--fg) 40%, var(--bg)));
+    --_text-faint:    color-mix(in srgb, var(--fg) 25%, var(--bg));
+    --_line:          var(--line, color-mix(in srgb, var(--fg) 50%, var(--bg)));
+    --_arrow:         var(--accent, color-mix(in srgb, var(--fg) 85%, var(--bg)));
+    --_node-fill:     var(--surface, color-mix(in srgb, var(--fg) 3%, var(--bg)));
+    --_node-stroke:   var(--border, color-mix(in srgb, var(--fg) 20%, var(--bg)));
+    --_group-fill:    var(--bg);
+    --_group-hdr:     color-mix(in srgb, var(--fg) 5%, var(--bg));
+    --_inner-stroke:  color-mix(in srgb, var(--fg) 12%, var(--bg));
+    --_key-badge:     color-mix(in srgb, var(--fg) 10%, var(--bg));
+  }
+</style>
+<defs>
+  <marker id="arrowhead" markerWidth="8" markerHeight="5" refX="7" refY="2.5" orient="auto">
+    <polygon points="0 0, 8 2.5, 0 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrowhead-start" markerWidth="8" markerHeight="5" refX="1" refY="2.5" orient="auto-start-reverse">
+    <polygon points="8 0, 0 2.5, 8 5" fill="var(--_arrow)" stroke="var(--_arrow)" stroke-width="0.75" stroke-linejoin="round" />
+  </marker>
+</defs>
+<g class="subgraph" data-id="CLIENT" data-label="  CLIENT LAYER">
+  <rect x="762.3834999999999" y="40" width="366.77750000000003" height="267" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="762.3834999999999" y="40" width="366.77750000000003" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="774.3834999999999" y="54" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">  CLIENT LAYER</text>
+</g>
+<g class="subgraph" data-id="AUTH" data-label="  AUTHENTICATION — Clerk v6">
+  <rect x="197.725166666667" y="399.3" width="393.686" height="475.202" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="197.725166666667" y="399.3" width="393.686" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="209.725166666667" y="413.3" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">  AUTHENTICATION — Clerk v6</text>
+</g>
+<g class="subgraph" data-id="PAGES" data-label="  NEXT.JS 15 PAGES — App Router / React Server Components">
+  <rect x="904.2799999999995" y="907.9019999999998" width="229.55999999999997" height="942.5" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="904.2799999999995" y="907.9019999999998" width="229.55999999999997" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="916.2799999999995" y="921.9019999999998" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">  NEXT.JS 15 PAGES — App Router / React Server Components</text>
+</g>
+<g class="subgraph" data-id="LOGIC" data-label="  SERVER ACTIONS + API ROUTES">
+  <rect x="1407.7087000000001" y="1657.4353333333331" width="956.7853" height="300.8" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="1407.7087000000001" y="1657.4353333333331" width="956.7853" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="1419.7087000000001" y="1671.4353333333331" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">  SERVER ACTIONS + API ROUTES</text>
+</g>
+<g class="subgraph" data-id="EXT" data-label="  EXTERNAL SERVICES">
+  <rect x="862.2324999999996" y="2317.852" width="806.658" height="130.7" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="862.2324999999996" y="2317.852" width="806.658" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="874.2324999999996" y="2331.852" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">  EXTERNAL SERVICES</text>
+</g>
+<g class="subgraph" data-id="DB" data-label="  FIREBASE FIRESTORE — Admin SDK">
+  <rect x="3450.7605833333328" y="1995.285333333333" width="396.73199999999997" height="509.5" rx="0" ry="0" fill="var(--_group-fill)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <rect x="3450.7605833333328" y="1995.285333333333" width="396.73199999999997" height="28" rx="0" ry="0" fill="var(--_group-hdr)" stroke="var(--_node-stroke)" stroke-width="1" />
+  <text x="3462.7605833333328" y="2009.285333333333" font-size="12" font-weight="600" fill="var(--_text-sec)" dy="4.199999999999999">  FIREBASE FIRESTORE — Admin SDK</text>
+</g>
+<polyline class="edge" data-from="USR" data-to="MW" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="every request" points="827.9348333333332,120.9 827.9348333333332,132.9 814.4929999999999,132.9 814.4929999999999,307 814.4929999999999,319 465.7601666666669,319 465.760166666667,399.3 465.760166666667,443.3" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ORG_CHK" data-to="ADM" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="org member" points="475.7648333333337,685.4183333333333 475.7648333333337,717.3019999999999 485.64383333333365,717.3019999999999 485.64383333333365,874.502 485.64383333333365,1008.3019999999999 491.1659999999999,1008.3019999999999 491.1659999999999,1659.9019999999996 904.2799999999995,1659.9019999999996 920.2799999999995,1659.9019999999996" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ORG_CHK" data-to="ADM_P" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="org member" points="495.6485000000003,665.5346666666667 495.6485000000003,717.3019999999999 505.5275000000003,717.3019999999999 505.5275000000003,874.502 505.5275000000003,934.502 568.0579999999998,934.502 568.0579999999998,978.8019999999999 904.2799999999995,978.8019999999998 920.2799999999995,978.8019999999998" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ORG_CHK" data-to="ADM_O" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="org member" points="416.1138333333337,665.5346666666667 416.1138333333337,717.3019999999999 265.725166666667,717.3019999999999 265.725166666667,874.502 265.725166666667,1008.3019999999999 337.38200000000006,1008.3019999999999 337.38200000000006,1052.6019999999999 904.2799999999995,1052.6019999999999 920.2799999999995,1052.6019999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ORG_CHK" data-to="ADM_R" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="org member" points="455.88116666666696,705.3019999999999 455.88116666666696,717.3019999999999 465.760166666667,717.3019999999999 465.760166666667,874.502 465.760166666667,1008.3019999999999 414.27399999999994,1008.3019999999999 414.27399999999994,1134.8519999999999 904.2799999999995,1134.8519999999999 920.2799999999995,1134.8519999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MW" data-to="HOME" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="public routes" points="510.57866666666695,514 510.57866666666695,538 561.411166666667,538 561.411166666667,874.502 561.411166666667,898.502 739.7819999999997,898.502 739.7819999999997,1225.552 904.2799999999995,1225.552 920.2799999999995,1225.552" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MW" data-to="PDP" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="public routes" points="525.518166666667,514 525.518166666667,526 574.411166666667,526 574.411166666667,874.502 574.411166666667,886.502 822.6139999999996,886.502 822.6139999999996,1299.3519999999999 904.2799999999995,1299.3519999999999 920.2799999999995,1299.3519999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MW" data-to="SRCH" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="public routes" points="495.639166666667,514 495.639166666667,550 548.411166666667,550 548.411166666667,874.502 548.411166666667,910.502 656.9499999999997,910.502 656.9499999999997,1373.6686666666665 904.2799999999995,1373.6686666666665 920.2799999999995,1373.6686666666665" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MW" data-to="CHK" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="authenticated" points="420.94166666666695,514 420.94166666666695,538 226.725166666667,538 226.725166666667,874.502 226.725166666667,1299.4353333333331 87.53999999999996,1299.4353333333331 87.53999999999996,1429.5353333333333 904.2799999999995,1429.5353333333333 920.2799999999995,1429.5353333333333" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MW" data-to="ACC" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="authenticated" points="450.82066666666697,514 450.82066666666697,562 252.725166666667,562 252.725166666667,874.502 252.725166666667,1311.4353333333331 256.76800000000003,1311.4353333333331 256.76800000000003,1512.3019999999997 904.2799999999995,1512.3019999999997 920.2799999999995,1512.3019999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MW" data-to="WISH" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="authenticated" points="435.881166666667,514 435.881166666667,550 239.725166666667,550 239.725166666667,874.502 239.725166666667,1311.4353333333331 172.154,1311.4353333333331 172.154,1586.1019999999999 904.2799999999995,1586.1019999999999 920.2799999999995,1586.1019999999999" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MW" data-to="SIGN" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="406.002166666667,514 406.002166666667,526 213.725166666667,526 213.725166666667,874.502 213.725166666667,1287.4353333333331 40.039999999999964,1287.4353333333331 40.039999999999964,1733.7019999999998 904.2799999999995,1731.0186666666664 920.2799999999995,1731.0186666666664" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CART_CTX" data-to="CHK" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="proceed to checkout" points="890.9279999999999,291 890.9279999999999,307 890.9279999999999,827.6019999999999 894.2799999999995,827.6019999999999 894.2799999999995,1447.4686666666664 904.2799999999995,1447.4686666666664 920.2799999999995,1447.4686666666664" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="HOME" data-to="PRODS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="getTrendingProducts()" points="1057.0779999999995,1225.552 1133.8399999999995,1225.552 2834.6825833333332,1225.552 2834.6825833333332,2062.985333333333 3450.7605833333328,2062.985333333333 3466.7605833333328,2062.985333333333" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PDP" data-to="PRODS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="getProduct(handle)" points="1063.0059999999994,1293.2019999999998 1133.8399999999995,1293.2019999999998 2955.440583333333,1293.2019999999998 2955.440583333333,2050.985333333333 3192.100583333333,2050.985333333333 3192.100583333333,2074.8353333333334 3450.7605833333328,2074.835333333333 3466.7605833333328,2074.835333333333" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PDP" data-to="PRODS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="FieldValue.increment(1)" points="1063.0059999999994,1305.502 1133.8399999999995,1305.502 3076.378583333333,1305.502 3076.378583333333,2038.9853333333328 3180.100583333333,2038.9853333333328 3180.100583333333,2086.685333333333 3450.7605833333328,2086.685333333333 3466.7605833333328,2086.685333333333" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SRCH" data-to="API_AI" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="query" points="1072.6389999999994,1364.7019999999998 1133.8399999999995,1364.7019999999998 1592.4862999999998,1364.7019999999998 1592.4862999999998,1633.4353333333331 1549.0929500000002,1633.4353333333331 1549.0929500000002,1657.4353333333331 1549.0929500000002,1704.1186666666663" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="API_AI" data-to="GPT35" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="prompt" points="1524.0161,1774.8186666666663 1524.0161,1958.235333333333 1524.0161,1982.235333333333 1509.84,1982.235333333333 1509.84,2038.535333333333 974.7894999999996,2038.535333333333 974.7894999999996,2317.852 974.7894999999996,2361.852" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="GPT35" data-to="API_AI" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="JSON filters" points="974.7894999999996,2432.5519999999997 974.7894999999996,2448.5519999999997 974.7894999999996,2472.5519999999997 2523.9865833333324,2472.5519999999997 2523.9865833333324,1621.4353333333331 1507.2982000000002,1621.4353333333331 1507.2982000000002,1657.4353333333331 1507.2982000000002,1704.1186666666663" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="API_AI" data-to="PRODS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="getProducts(filters)" points="1557.4519,1774.8186666666663 1557.4519,1958.235333333333 1557.4519000000003,1982.235333333333 1653.2657499999998,1982.235333333333 1653.2657499999998,2098.5353333333333 1986.1736666666668,2098.5353333333333 1986.1736666666668,2098.5353333333333 3450.7605833333328,2098.5353333333333 3466.7605833333328,2098.5353333333333" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="IMG_UP" data-to="API_IMG" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="base64 image" points="1044.762,137.8 1044.762,307 1044.762,895.9019999999998 2657.5105833333328,895.9019999999998 2657.5105833333328,1609.4353333333331 1684.8442000000002,1609.4353333333331 1684.8442,1657.4353333333331 1684.8442,1704.1186666666663" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="API_IMG" data-to="GPT4V" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="image_url" points="1684.8442,1774.8186666666663 1684.8442,1958.235333333333 1684.8442000000002,1982.235333333333 1743.20375,1982.235333333333 1743.20375,2050.5353333333333 1193.0904999999996,2050.5353333333333 1193.0904999999996,2317.852 1193.0904999999996,2361.852" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="GPT4V" data-to="API_AI" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="wig description" points="1193.0904999999996,2415.652 1193.0904999999996,2448.5519999999997 1193.0904999999996,2460.5519999999997 1842.7996666666666,2460.5519999999997 1842.7996666666666,2269.852 1329.8179999999998,2269.852 1329.8179999999998,1645.4353333333331 1465.5034500000002,1645.4353333333331 1465.5034500000002,1657.4353333333331 1465.5034500000002,1704.1186666666663" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="API_AI" data-to="SRCH" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="aiInterpretation" points="1457.1445,1774.8186666666663 1457.1445,1958.235333333333 1457.1445,1970.235333333333 297.07500000000005,1970.235333333333 297.07500000000005,1355.735333333333 904.2799999999995,1355.735333333333 920.2799999999995,1355.735333333333" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="API_AI" data-to="LOGS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="logSearchQuery()" points="1490.5803,1774.8186666666663 1490.5803,1958.235333333333 1490.5803,1982.235333333333 1429.6539999999998,1982.235333333333 1429.6539999999998,2220.135333333333 1898.7176666666667,2220.135333333333 1898.7176666666667,2220.135333333333 3450.7605833333328,2220.135333333333 3466.7605833333328,2220.135333333333" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="CHK" data-to="SA_ORD" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="placeOrder()" points="1117.8399999999995,1438.5019999999997 1133.8399999999995,1438.5019999999997 1526.2483,1438.5019999999997 1526.2483,1645.4353333333331 1914.2585000000001,1645.4353333333331 1914.2585000000001,1657.4353333333331 1914.2585000000001,1704.1186666666663" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SA_ORD" data-to="ORDERS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="add order doc" points="1901.8384,1774.8186666666663 1901.8384,1796.1353333333332 1925.5987,1796.1353333333332 1925.5987,1958.235333333333 1925.5987000000002,2018.235333333333 1926.455083333333,2018.235333333333 1926.455083333333,2074.5353333333333 2158.166583333333,2074.5353333333333 2158.166583333333,2299.4186666666665 3450.7605833333328,2299.4186666666665 3466.7605833333328,2299.4186666666665" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SA_ORD" data-to="PRODS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="decrement inventory" points="1926.6786000000002,1774.8186666666663 1926.6786000000002,1784.1353333333332 1944.5188000000003,1784.1353333333332 1944.5188000000003,1958.235333333333 1944.5188,2006.235333333333 2029.633083333333,2006.235333333333 2029.633083333333,2050.5353333333333 2215.755583333333,2050.5353333333333 2215.755583333333,2110.385333333333 3450.7605833333328,2110.385333333333 3466.7605833333328,2110.385333333333" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SA_ORD" data-to="RESEND" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="sendOrderConfirmation()" points="1951.5188000000003,1774.8186666666663 1951.5188000000003,1784.1353333333332 1963.4389,1784.1353333333332 1963.4389,1958.235333333333 1963.4389000000003,1994.235333333333 2158.105083333333,1994.235333333333 2158.105083333333,2062.5353333333333 1391.0139999999994,2062.5353333333333 1391.0139999999997,2317.852 1391.0139999999997,2361.852" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SA_COMP" data-to="ORDERS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="status: completed" points="1824.4000333333333,1930.985333333333 1824.4000333333333,1958.235333333333 1824.4000333333336,1982.235333333333 1828.1857499999999,1982.235333333333 1828.1857499999999,2086.5353333333333 2101.5672499999996,2086.5353333333333 2101.5672499999996,2333.2853333333333 3450.7605833333328,2333.2853333333333 3466.7605833333328,2333.2853333333333" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SA_COMP" data-to="OK" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="redirect" points="1869.999366666667,1930.985333333333 1869.999366666667,1958.235333333333 1869.9993666666667,1994.235333333333 214.461,1994.235333333333 214.461,1807.5019999999997 904.2799999999995,1804.8186666666663 920.2799999999995,1804.8186666666663" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ACC" data-to="ORDERS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="getOrdersByUserId()" points="1093.3869999999995,1512.3019999999997 1133.8399999999995,1512.3019999999997 1265.3759999999997,1512.3019999999997 1265.3759999999997,2281.852 1804.5786666666665,2281.852 1804.5786666666665,2367.152 3450.7605833333328,2367.1519999999996 3466.7605833333328,2367.1519999999996" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="WISH" data-to="WISHLISTS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="getWishlistProducts()" points="1060.0419999999995,1595.0686666666666 1133.8399999999995,1595.0686666666666 1143.8399999999997,1595.0686666666666 1143.8399999999997,2293.852 1737.8106666666665,2293.852 1737.8106666666665,2432.3186666666666 3450.7605833333328,2432.3186666666666 3466.7605833333328,2432.3186666666666" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="WISH" data-to="PRODS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="product details" points="1060.0419999999995,1577.1353333333332 1133.8399999999995,1577.1353333333332 2724.534583333333,1577.1353333333332 2724.534583333333,2122.235333333333 3450.7605833333328,2122.235333333333 3466.7605833333328,2122.235333333333" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="WA" data-to="WISHLISTS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="toggle item" points="2264.9045,1947.8853333333332 2264.9045,1958.235333333333 2264.9045,1970.235333333333 2449.7225833333328,1970.235333333333 2449.7225833333328,2460.5519999999997 3450.7605833333328,2460.5519999999997 3466.7605833333328,2460.5519999999997" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ADM_P" data-to="PRODS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="getAdminProducts()" points="1057.0779999999995,969.8353333333332 1133.8399999999995,969.8353333333332 3198.636583333333,969.8353333333332 3198.636583333333,2026.9853333333328 3168.100583333333,2026.9853333333328 3168.100583333333,2134.0853333333334 3450.7605833333328,2134.085333333333 3466.7605833333328,2134.085333333333" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ADM_P" data-to="PA" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="1057.0779999999995,987.7686666666665 1133.8399999999995,987.7686666666665 2670.5105833333328,987.7686666666664 2670.5105833333328,1645.4353333333331 2078.8370000000004,1645.4353333333331 2078.8370000000004,1657.4353333333331 2078.8370000000004,1704.1186666666663" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="PA" data-to="PRODS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="create / update / delete" points="2078.8370000000004,1791.7186666666664 2078.8370000000004,1958.235333333333 2078.8370000000004,1982.235333333333 2352.028583333333,1982.235333333333 2352.028583333333,2145.9353333333333 3450.7605833333328,2145.935333333333 3466.7605833333328,2145.935333333333" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ADM_O" data-to="ORDERS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="getAdminOrders()" points="1074.8619999999996,1052.6019999999999 1133.8399999999995,1052.6019999999999 3307.950583333333,1052.6019999999999 3307.950583333333,2014.9853333333328 3113.6955833333327,2014.9853333333328 3113.6955833333327,2316.352 3450.7605833333328,2316.352 3466.7605833333328,2316.352" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ADM_R" data-to="ORDERS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="getReportData() — all orders" points="1076.3439999999996,1123.0686666666666 1133.8399999999995,1123.0686666666666 2603.4865833333324,1123.0686666666666 2603.4865833333324,2350.2186666666666 3450.7605833333328,2350.218666666666 3466.7605833333328,2350.218666666666" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ADM_R" data-to="PRODS" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="getReportData() — all products" points="1076.3439999999996,1146.6353333333332 1133.8399999999995,1146.6353333333332 3440.7605833333328,1146.6353333333332 3440.7605833333328,2051.1353333333327 3450.7605833333328,2051.1353333333327 3466.7605833333328,2051.135333333333" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="MW" data-to="CLERK_SVC" data-style="solid" data-arrow-start="true" data-arrow-end="true" data-label="JWT verify" points="480.699666666667,514 480.699666666667,562 535.411166666667,562 535.411166666667,874.502 535.411166666667,922.502 610.4499999999997,922.502 610.4499999999997,2305.852 1570.0419999999997,2305.852 1570.0419999999995,2317.852 1570.0419999999997,2361.852" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" marker-start="url(#arrowhead-start)" />
+<polyline class="edge" data-from="USR" data-to="CART_CTX" data-style="solid" data-arrow-start="true" data-arrow-end="true" data-label="add / remove / qty" points="877.4861666666666,120.9 877.4861666666666,132.9 890.9279999999999,132.9 890.9279999999999,237.2" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" marker-start="url(#arrowhead-start)" />
+<polyline class="edge" data-from="MW" data-to="ORG_CHK" data-style="solid" data-arrow-start="false" data-arrow-end="true" points="465.760166666667,514 465.760166666667,574 455.881166666667,574 455.881166666667,586" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="ORG_CHK" data-to="UNAUTH" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="no org" points="435.99750000000034,685.4183333333333 435.99750000000034,729.3019999999999 366.242666666667,729.3019999999999 366.242666666667,821.602" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<polyline class="edge" data-from="SA_ORD" data-to="SA_COMP" data-style="solid" data-arrow-start="false" data-arrow-end="true" data-label="completeOrder()" points="1876.9982,1774.8186666666663 1876.9982,1784.1353333333332 1847.1997000000001,1784.1353333333332 1847.1997000000001,1877.1853333333331" fill="none" stroke="var(--_line)" stroke-width="1" marker-end="url(#arrowhead)" />
+<g class="edge-label" data-from="USR" data-to="MW" data-label="every request">
+  <rect x="423.2601666666669" y="326" width="84.772" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="465.64616666666694" y="341.15" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">every request</text>
+</g>
+<g class="edge-label" data-from="ORG_CHK" data-to="ADM" data-label="org member">
+  <rect x="454.6659999999999" y="1015.302" width="72.89200000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="491.1119999999999" y="1030.452" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">org member</text>
+</g>
+<g class="edge-label" data-from="ORG_CHK" data-to="ADM_P" data-label="org member">
+  <rect x="531.5579999999998" y="941.502" width="72.89200000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="568.0039999999998" y="956.6519999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">org member</text>
+</g>
+<g class="edge-label" data-from="ORG_CHK" data-to="ADM_O" data-label="org member">
+  <rect x="300.88200000000006" y="1015.302" width="72.89200000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="337.3280000000001" y="1030.452" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">org member</text>
+</g>
+<g class="edge-label" data-from="ORG_CHK" data-to="ADM_R" data-label="org member">
+  <rect x="377.77399999999994" y="1015.302" width="72.89200000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="414.21999999999997" y="1030.452" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">org member</text>
+</g>
+<g class="edge-label" data-from="MW" data-to="HOME" data-label="public routes">
+  <rect x="700.2819999999997" y="941.502" width="78.832" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="739.6979999999996" y="956.6519999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">public routes</text>
+</g>
+<g class="edge-label" data-from="MW" data-to="PDP" data-label="public routes">
+  <rect x="783.1139999999996" y="941.502" width="78.832" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="822.5299999999995" y="956.6519999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">public routes</text>
+</g>
+<g class="edge-label" data-from="MW" data-to="SRCH" data-label="public routes">
+  <rect x="617.4499999999998" y="941.502" width="78.832" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="656.8659999999998" y="956.6519999999999" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">public routes</text>
+</g>
+<g class="edge-label" data-from="MW" data-to="CHK" data-label="authenticated">
+  <rect x="47.03999999999997" y="1392.2353333333333" width="80.61400000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="87.34699999999998" y="1407.3853333333334" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">authenticated</text>
+</g>
+<g class="edge-label" data-from="MW" data-to="ACC" data-label="authenticated">
+  <rect x="216.26800000000003" y="1318.4353333333331" width="80.61400000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="256.57500000000005" y="1333.5853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">authenticated</text>
+</g>
+<g class="edge-label" data-from="MW" data-to="WISH" data-label="authenticated">
+  <rect x="131.654" y="1392.2353333333333" width="80.61400000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="171.961" y="1407.3853333333334" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">authenticated</text>
+</g>
+<g class="edge-label" data-from="CART_CTX" data-to="CHK" data-label="proceed to checkout">
+  <rect x="837.2799999999995" y="834.6019999999999" width="113.878" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="894.2189999999995" y="849.7519999999998" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">proceed to checkout</text>
+</g>
+<g class="edge-label" data-from="HOME" data-to="PRODS" data-label="getTrendingProducts()">
+  <rect x="2771.6825833333332" y="2025.685333333333" width="125.75800000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2834.561583333333" y="2040.835333333333" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">getTrendingProducts()</text>
+</g>
+<g class="edge-label" data-from="PDP" data-to="PRODS" data-label="getProduct(handle)">
+  <rect x="2901.440583333333" y="2013.685333333333" width="107.938" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2955.409583333333" y="2028.835333333333" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">getProduct(handle)</text>
+</g>
+<g class="edge-label" data-from="PDP" data-to="PRODS" data-label="FieldValue.increment(1)">
+  <rect x="3013.378583333333" y="1977.685333333333" width="125.75800000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="3076.257583333333" y="1992.835333333333" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">FieldValue.increment(1)</text>
+</g>
+<g class="edge-label" data-from="SRCH" data-to="API_AI" data-label="query">
+  <rect x="1568.9862999999998" y="1584.1353333333332" width="46.162" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1592.0672999999997" y="1599.2853333333333" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">query</text>
+</g>
+<g class="edge-label" data-from="API_AI" data-to="GPT35" data-label="prompt">
+  <rect x="1484.84" y="2001.235333333333" width="49.726000000000006" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1509.703" y="2016.3853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">prompt</text>
+</g>
+<g class="edge-label" data-from="GPT35" data-to="API_AI" data-label="JSON filters">
+  <rect x="2486.4865833333324" y="2061.235333333333" width="74.08000000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2523.5265833333324" y="2076.385333333333" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">JSON filters</text>
+</g>
+<g class="edge-label" data-from="API_AI" data-to="PRODS" data-label="getProducts(filters)">
+  <rect x="1599.2657499999998" y="2013.235333333333" width="107.93800000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1653.2347499999998" y="2028.3853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">getProducts(filters)</text>
+</g>
+<g class="edge-label" data-from="IMG_UP" data-to="API_IMG" data-label="base64 image">
+  <rect x="2616.0105833333328" y="932.5353333333333" width="82.39600000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2657.2085833333326" y="947.6853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">base64 image</text>
+</g>
+<g class="edge-label" data-from="API_IMG" data-to="GPT4V" data-label="image_url">
+  <rect x="1711.20375" y="2013.235333333333" width="63.982" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1743.1947499999999" y="2028.3853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">image_url</text>
+</g>
+<g class="edge-label" data-from="GPT4V" data-to="API_AI" data-label="wig description">
+  <rect x="1285.3179999999998" y="2001.235333333333" width="88.33600000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1329.4859999999999" y="2016.3853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">wig description</text>
+</g>
+<g class="edge-label" data-from="API_AI" data-to="SRCH" data-label="aiInterpretation">
+  <rect x="252.57500000000007" y="1932.9353333333331" width="88.93" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="297.0400000000001" y="1948.0853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">aiInterpretation</text>
+</g>
+<g class="edge-label" data-from="API_AI" data-to="LOGS" data-label="logSearchQuery()">
+  <rect x="1377.6539999999998" y="2001.235333333333" width="103.18599999999999" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1429.2469999999998" y="2016.3853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">logSearchQuery()</text>
+</g>
+<g class="edge-label" data-from="CHK" data-to="SA_ORD" data-label="placeOrder()">
+  <rect x="1486.7483" y="1584.1353333333332" width="78.23800000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1525.8673" y="1599.2853333333333" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">placeOrder()</text>
+</g>
+<g class="edge-label" data-from="SA_ORD" data-to="ORDERS" data-label="add order doc">
+  <rect x="1883.955083333333" y="2025.235333333333" width="84.178" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1926.044083333333" y="2040.3853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">add order doc</text>
+</g>
+<g class="edge-label" data-from="SA_ORD" data-to="PRODS" data-label="decrement inventory">
+  <rect x="1972.133083333333" y="2013.235333333333" width="114.47200000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2029.369083333333" y="2028.3853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">decrement inventory</text>
+</g>
+<g class="edge-label" data-from="SA_ORD" data-to="RESEND" data-label="sendOrderConfirmation()">
+  <rect x="2090.605083333333" y="2013.235333333333" width="134.074" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2157.6420833333327" y="2028.3853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">sendOrderConfirmation()</text>
+</g>
+<g class="edge-label" data-from="SA_COMP" data-to="ORDERS" data-label="status: completed">
+  <rect x="1779.1857499999999" y="2025.235333333333" width="97.84000000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1828.10575" y="2040.3853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">status: completed</text>
+</g>
+<g class="edge-label" data-from="SA_COMP" data-to="OK" data-label="redirect">
+  <rect x="186.461" y="1956.9353333333331" width="55.666000000000004" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="214.294" y="1972.0853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">redirect</text>
+</g>
+<g class="edge-label" data-from="ACC" data-to="ORDERS" data-label="getOrdersByUserId()">
+  <rect x="1206.3759999999997" y="1932.9353333333331" width="117.442" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1265.0969999999998" y="1948.0853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">getOrdersByUserId()</text>
+</g>
+<g class="edge-label" data-from="WISH" data-to="WISHLISTS" data-label="getWishlistProducts()">
+  <rect x="1084.3399999999997" y="1932.9353333333331" width="118.03600000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1143.3579999999997" y="1948.0853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">getWishlistProducts()</text>
+</g>
+<g class="edge-label" data-from="WISH" data-to="PRODS" data-label="product details">
+  <rect x="2680.534583333333" y="2061.235333333333" width="87.14800000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2724.108583333333" y="2076.385333333333" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">product details</text>
+</g>
+<g class="edge-label" data-from="WA" data-to="WISHLISTS" data-label="toggle item">
+  <rect x="2416.7225833333328" y="2061.235333333333" width="65.764" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2449.604583333333" y="2076.385333333333" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">toggle item</text>
+</g>
+<g class="edge-label" data-from="ADM_P" data-to="PRODS" data-label="getAdminProducts()">
+  <rect x="3143.136583333333" y="1977.685333333333" width="110.31400000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="3198.293583333333" y="1992.835333333333" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">getAdminProducts()</text>
+</g>
+<g class="edge-label" data-from="PA" data-to="PRODS" data-label="create / update / delete">
+  <rect x="2290.528583333333" y="2061.235333333333" width="122.19400000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2351.625583333333" y="2076.385333333333" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">create / update / delete</text>
+</g>
+<g class="edge-label" data-from="ADM_O" data-to="ORDERS" data-label="getAdminOrders()">
+  <rect x="3257.450583333333" y="1977.685333333333" width="100.81000000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="3307.855583333333" y="1992.835333333333" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">getAdminOrders()</text>
+</g>
+<g class="edge-label" data-from="ADM_R" data-to="ORDERS" data-label="getReportData() — all orders">
+  <rect x="2529.9865833333324" y="2028.9353333333331" width="146.54800000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="2603.2605833333323" y="2044.0853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">getReportData() — all orders</text>
+</g>
+<g class="edge-label" data-from="ADM_R" data-to="PRODS" data-label="getReportData() — all products">
+  <rect x="3362.2605833333328" y="1921.985333333333" width="156.05200000000002" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="3440.2865833333326" y="1937.1353333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">getReportData() — all products</text>
+</g>
+<g class="edge-label" data-from="MW" data-to="CLERK_SVC" data-label="JWT verify">
+  <rect x="575.4499999999997" y="1932.9353333333331" width="69.92200000000001" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="610.4109999999997" y="1948.0853333333332" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">JWT verify</text>
+</g>
+<g class="edge-label" data-from="USR" data-to="CART_CTX" data-label="add / remove / qty">
+  <rect x="841.428" y="163.9" width="98.43400000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="890.645" y="179.05" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">add / remove / qty</text>
+</g>
+<g class="edge-label" data-from="ORG_CHK" data-to="UNAUTH" data-label="no org">
+  <rect x="342.242666666667" y="748.302" width="47.944" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="366.214666666667" y="763.452" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">no org</text>
+</g>
+<g class="edge-label" data-from="SA_ORD" data-to="SA_COMP" data-label="completeOrder()">
+  <rect x="1800.1997" y="1815.135333333333" width="93.68200000000003" height="30.3" rx="2" ry="2" fill="var(--bg)" stroke="var(--_inner-stroke)" stroke-width="1" />
+  <text x="1847.0407" y="1830.285333333333" text-anchor="middle" font-size="11" font-weight="400" fill="var(--_text-sec)" dy="3.8499999999999996">completeOrder()</text>
+</g>
+<g class="node" data-id="USR" data-label="👤 User / Browser" data-shape="stadium">
+  <rect x="778.3834999999999" y="84" width="148.654" height="36.900000000000006" rx="18.450000000000003" ry="18.450000000000003" fill="#1c1917" stroke="#f97316" stroke-width="0.75" />
+  <text x="852.7104999999999" y="102.45" text-anchor="middle" font-size="13" font-weight="500" fill="#ffedd5" dy="4.55">👤 User / Browser</text>
+</g>
+<g class="node" data-id="CART_CTX" data-label="🛒 Cart Context
++ localStorage" data-shape="rectangle">
+  <rect x="825.4929999999999" y="237.2" width="130.87" height="53.800000000000004" rx="0" ry="0" fill="#1c1917" stroke="#f97316" stroke-width="0.75" />
+  <text x="890.9279999999999" y="264.09999999999997" text-anchor="middle" font-size="13" font-weight="500" fill="#ffedd5"><tspan x="890.9279999999999" dy="-3.9000000000000012">🛒 Cart Context</tspan><tspan x="890.9279999999999" dy="16.900000000000002">+ localStorage</tspan></text>
+</g>
+<g class="node" data-id="IMG_UP" data-label="📷 Image Upload
+(camera icon)" data-shape="rectangle">
+  <rect x="976.3629999999999" y="84" width="136.798" height="53.800000000000004" rx="0" ry="0" fill="#1c1917" stroke="#f97316" stroke-width="0.75" />
+  <text x="1044.762" y="110.9" text-anchor="middle" font-size="13" font-weight="500" fill="#ffedd5"><tspan x="1044.762" dy="-3.9000000000000012">📷 Image Upload</tspan><tspan x="1044.762" dy="16.900000000000002">(camera icon)</tspan></text>
+</g>
+<g class="node" data-id="MW" data-label="🔒 Middleware
+clerkMiddleware()
+protects /admin/*" data-shape="rectangle">
+  <rect x="391.062666666667" y="443.3" width="149.395" height="70.7" rx="0" ry="0" fill="#2d1b00" stroke="#f59e0b" stroke-width="0.75" />
+  <text x="465.760166666667" y="478.65000000000003" text-anchor="middle" font-size="13" font-weight="500" fill="#fef3c7"><tspan x="465.760166666667" dy="-12.350000000000001">🔒 Middleware</tspan><tspan x="465.760166666667" dy="16.900000000000002">clerkMiddleware()</tspan><tspan x="465.760166666667" dy="16.900000000000002">protects /admin/*</tspan></text>
+</g>
+<g class="node" data-id="ORG_CHK" data-label="orgId
+present?" data-shape="diamond">
+  <polygon points="455.881166666667,586 515.532166666667,645.651 455.881166666667,705.3019999999999 396.230166666667,645.651" fill="#2d1b00" stroke="#f59e0b" stroke-width="0.75" />
+  <text x="455.881166666667" y="645.651" text-anchor="middle" font-size="13" font-weight="500" fill="#fef3c7"><tspan x="455.881166666667" dy="-3.9000000000000012">orgId</tspan><tspan x="455.881166666667" dy="16.900000000000002">present?</tspan></text>
+</g>
+<g class="node" data-id="UNAUTH" data-label="🚫 /admin/unauthorized" data-shape="rectangle">
+  <rect x="276.725166666667" y="821.602" width="179.03499999999997" height="36.900000000000006" rx="0" ry="0" fill="#2d1b00" stroke="#f59e0b" stroke-width="0.75" />
+  <text x="366.242666666667" y="840.052" text-anchor="middle" font-size="13" font-weight="500" fill="#fef3c7" dy="4.55">🚫 /admin/unauthorized</text>
+</g>
+<g class="node" data-id="HOME" data-label="/
+Homepage
++ Promo Banner" data-shape="rectangle">
+  <rect x="920.2799999999995" y="1190.2019999999998" width="136.798" height="70.7" rx="0" ry="0" fill="#1e293b" stroke="#38bdf8" stroke-width="0.75" />
+  <text x="988.6789999999995" y="1225.5519999999997" text-anchor="middle" font-size="13" font-weight="500" fill="#e2e8f0"><tspan x="988.6789999999995" dy="-12.350000000000001">/</tspan><tspan x="988.6789999999995" dy="16.900000000000002">Homepage</tspan><tspan x="988.6789999999995" dy="16.900000000000002">+ Promo Banner</tspan></text>
+</g>
+<g class="node" data-id="PDP" data-label="&quot;/product/[handle" data-shape="rectangle">
+  <rect x="920.2799999999995" y="1280.9019999999998" width="142.726" height="36.900000000000006" rx="0" ry="0" fill="#1e293b" stroke="#38bdf8" stroke-width="0.75" />
+  <text x="991.6429999999996" y="1299.3519999999999" text-anchor="middle" font-size="13" font-weight="500" fill="#e2e8f0" dy="4.55">&quot;/product/[handle</text>
+</g>
+<g class="node" data-id="SRCH" data-label="&quot;/search
+/search/[collection" data-shape="rectangle">
+  <rect x="920.2799999999995" y="1337.8019999999997" width="152.359" height="53.800000000000004" rx="0" ry="0" fill="#1e293b" stroke="#38bdf8" stroke-width="0.75" />
+  <text x="996.4594999999995" y="1364.7019999999998" text-anchor="middle" font-size="13" font-weight="500" fill="#e2e8f0"><tspan x="996.4594999999995" dy="-3.9000000000000012">&quot;/search</tspan><tspan x="996.4594999999995" dy="16.900000000000002">/search/[collection</tspan></text>
+</g>
+<g class="node" data-id="CHK" data-label="/checkout
+2-step: Shipping → Payment" data-shape="rectangle">
+  <rect x="920.2799999999995" y="1411.6019999999999" width="197.55999999999997" height="53.800000000000004" rx="0" ry="0" fill="#1e293b" stroke="#38bdf8" stroke-width="0.75" />
+  <text x="1019.0599999999995" y="1438.502" text-anchor="middle" font-size="13" font-weight="500" fill="#e2e8f0"><tspan x="1019.0599999999995" dy="-3.9000000000000012">/checkout</tspan><tspan x="1019.0599999999995" dy="16.900000000000002">2-step: Shipping → Payment</tspan></text>
+</g>
+<g class="node" data-id="OK" data-label="/checkout/success
+Order Confirmation" data-shape="rectangle">
+  <rect x="920.2799999999995" y="1777.9186666666665" width="156.06400000000002" height="53.800000000000004" rx="0" ry="0" fill="#1e293b" stroke="#38bdf8" stroke-width="0.75" />
+  <text x="998.3119999999996" y="1804.8186666666666" text-anchor="middle" font-size="13" font-weight="500" fill="#e2e8f0"><tspan x="998.3119999999996" dy="-3.9000000000000012">/checkout/success</tspan><tspan x="998.3119999999996" dy="16.900000000000002">Order Confirmation</tspan></text>
+</g>
+<g class="node" data-id="ACC" data-label="/account
+Profile + Order History" data-shape="rectangle">
+  <rect x="920.2799999999995" y="1485.4019999999998" width="173.107" height="53.800000000000004" rx="0" ry="0" fill="#1e293b" stroke="#38bdf8" stroke-width="0.75" />
+  <text x="1006.8334999999995" y="1512.302" text-anchor="middle" font-size="13" font-weight="500" fill="#e2e8f0"><tspan x="1006.8334999999995" dy="-3.9000000000000012">/account</tspan><tspan x="1006.8334999999995" dy="16.900000000000002">Profile + Order History</tspan></text>
+</g>
+<g class="node" data-id="WISH" data-label="/account/wishlist
+Wishlist Page" data-shape="rectangle">
+  <rect x="920.2799999999995" y="1559.2019999999998" width="139.762" height="53.800000000000004" rx="0" ry="0" fill="#1e293b" stroke="#38bdf8" stroke-width="0.75" />
+  <text x="990.1609999999995" y="1586.1019999999999" text-anchor="middle" font-size="13" font-weight="500" fill="#e2e8f0"><tspan x="990.1609999999995" dy="-3.9000000000000012">/account/wishlist</tspan><tspan x="990.1609999999995" dy="16.900000000000002">Wishlist Page</tspan></text>
+</g>
+<g class="node" data-id="SIGN" data-label="/sign-in  /sign-up
+Clerk Hosted UI" data-shape="rectangle">
+  <rect x="920.2799999999995" y="1704.1186666666663" width="136.798" height="53.800000000000004" rx="0" ry="0" fill="#1e293b" stroke="#38bdf8" stroke-width="0.75" />
+  <text x="988.6789999999995" y="1731.0186666666664" text-anchor="middle" font-size="13" font-weight="500" fill="#e2e8f0"><tspan x="988.6789999999995" dy="-3.9000000000000012">/sign-in  /sign-up</tspan><tspan x="988.6789999999995" dy="16.900000000000002">Clerk Hosted UI</tspan></text>
+</g>
+<g class="node" data-id="ADM" data-label="/admin
+Dashboard" data-shape="rectangle">
+  <rect x="920.2799999999995" y="1633.0019999999997" width="108.64" height="53.800000000000004" rx="0" ry="0" fill="#1e293b" stroke="#38bdf8" stroke-width="0.75" />
+  <text x="974.5999999999996" y="1659.9019999999998" text-anchor="middle" font-size="13" font-weight="500" fill="#e2e8f0"><tspan x="974.5999999999996" dy="-3.9000000000000012">/admin</tspan><tspan x="974.5999999999996" dy="16.900000000000002">Dashboard</tspan></text>
+</g>
+<g class="node" data-id="ADM_P" data-label="/admin/products
+Product CRUD" data-shape="rectangle">
+  <rect x="920.2799999999995" y="951.9019999999998" width="136.798" height="53.800000000000004" rx="0" ry="0" fill="#1e293b" stroke="#38bdf8" stroke-width="0.75" />
+  <text x="988.6789999999995" y="978.8019999999998" text-anchor="middle" font-size="13" font-weight="500" fill="#e2e8f0"><tspan x="988.6789999999995" dy="-3.9000000000000012">/admin/products</tspan><tspan x="988.6789999999995" dy="16.900000000000002">Product CRUD</tspan></text>
+</g>
+<g class="node" data-id="ADM_O" data-label="/admin/orders
+Order Management" data-shape="rectangle">
+  <rect x="920.2799999999995" y="1025.7019999999998" width="154.582" height="53.800000000000004" rx="0" ry="0" fill="#1e293b" stroke="#38bdf8" stroke-width="0.75" />
+  <text x="997.5709999999995" y="1052.6019999999999" text-anchor="middle" font-size="13" font-weight="500" fill="#e2e8f0"><tspan x="997.5709999999995" dy="-3.9000000000000012">/admin/orders</tspan><tspan x="997.5709999999995" dy="16.900000000000002">Order Management</tspan></text>
+</g>
+<g class="node" data-id="ADM_R" data-label="/admin/reports
+Financial · Product
+Customer Reports" data-shape="rectangle">
+  <rect x="920.2799999999995" y="1099.502" width="156.06400000000002" height="70.7" rx="0" ry="0" fill="#1e293b" stroke="#38bdf8" stroke-width="0.75" />
+  <text x="998.3119999999996" y="1134.8519999999999" text-anchor="middle" font-size="13" font-weight="500" fill="#e2e8f0"><tspan x="998.3119999999996" dy="-12.350000000000001">/admin/reports</tspan><tspan x="998.3119999999996" dy="16.900000000000002">Financial · Product</tspan><tspan x="998.3119999999996" dy="16.900000000000002">Customer Reports</tspan></text>
+</g>
+<g class="node" data-id="SA_ORD" data-label="placeOrder()
+Server Action
+lib/actions.ts" data-shape="rectangle">
+  <rect x="1852.1580000000001" y="1704.1186666666663" width="124.20100000000001" height="70.7" rx="0" ry="0" fill="#172554" stroke="#60a5fa" stroke-width="0.75" />
+  <text x="1914.2585000000001" y="1739.4686666666662" text-anchor="middle" font-size="13" font-weight="500" fill="#bfdbfe"><tspan x="1914.2585000000001" dy="-12.350000000000001">placeOrder()</tspan><tspan x="1914.2585000000001" dy="16.900000000000002">Server Action</tspan><tspan x="1914.2585000000001" dy="16.900000000000002">lib/actions.ts</tspan></text>
+</g>
+<g class="node" data-id="SA_COMP" data-label="completeOrder()
+Server Action" data-shape="rectangle">
+  <rect x="1778.8007000000002" y="1877.1853333333331" width="136.798" height="53.800000000000004" rx="0" ry="0" fill="#172554" stroke="#60a5fa" stroke-width="0.75" />
+  <text x="1847.1997000000001" y="1904.0853333333332" text-anchor="middle" font-size="13" font-weight="500" fill="#bfdbfe"><tspan x="1847.1997000000001" dy="-3.9000000000000012">completeOrder()</tspan><tspan x="1847.1997000000001" dy="16.900000000000002">Server Action</tspan></text>
+</g>
+<g class="node" data-id="SA_FILT" data-label="filterProducts()
+Server Action" data-shape="rectangle">
+  <rect x="2181.315" y="1704.1186666666663" width="129.388" height="53.800000000000004" rx="0" ry="0" fill="#172554" stroke="#60a5fa" stroke-width="0.75" />
+  <text x="2246.009" y="1731.0186666666664" text-anchor="middle" font-size="13" font-weight="500" fill="#bfdbfe"><tspan x="2246.009" dy="-3.9000000000000012">filterProducts()</tspan><tspan x="2246.009" dy="16.900000000000002">Server Action</tspan></text>
+</g>
+<g class="node" data-id="PA" data-label="createProduct()
+updateProduct()
+deleteProduct()
+lib/product-actions.ts" data-shape="rectangle">
+  <rect x="1996.3590000000002" y="1704.1186666666663" width="164.95600000000002" height="87.60000000000001" rx="0" ry="0" fill="#172554" stroke="#60a5fa" stroke-width="0.75" />
+  <text x="2078.837" y="1747.9186666666662" text-anchor="middle" font-size="13" font-weight="500" fill="#bfdbfe"><tspan x="2078.837" dy="-20.8">createProduct()</tspan><tspan x="2078.837" dy="16.900000000000002">updateProduct()</tspan><tspan x="2078.837" dy="16.900000000000002">deleteProduct()</tspan><tspan x="2078.837" dy="16.900000000000002">lib/product-actions.ts</tspan></text>
+</g>
+<g class="node" data-id="WA" data-label="toggleWishlist()
+getWishlistProducts()
+lib/wishlist-actions.ts" data-shape="rectangle">
+  <rect x="2181.315" y="1877.1853333333331" width="167.179" height="70.7" rx="0" ry="0" fill="#172554" stroke="#60a5fa" stroke-width="0.75" />
+  <text x="2264.9045" y="1912.535333333333" text-anchor="middle" font-size="13" font-weight="500" fill="#bfdbfe"><tspan x="2264.9045" dy="-12.350000000000001">toggleWishlist()</tspan><tspan x="2264.9045" dy="16.900000000000002">getWishlistProducts()</tspan><tspan x="2264.9045" dy="16.900000000000002">lib/wishlist-actions.ts</tspan></text>
+</g>
+<g class="node" data-id="API_AI" data-label="/api/ai-search
+GPT-3.5 intent parser
+→ Firestore filters" data-shape="rectangle">
+  <rect x="1423.7087000000001" y="1704.1186666666663" width="167.179" height="70.7" rx="0" ry="0" fill="#172554" stroke="#60a5fa" stroke-width="0.75" />
+  <text x="1507.2982000000002" y="1739.4686666666662" text-anchor="middle" font-size="13" font-weight="500" fill="#bfdbfe"><tspan x="1507.2982000000002" dy="-12.350000000000001">/api/ai-search</tspan><tspan x="1507.2982000000002" dy="16.900000000000002">GPT-3.5 intent parser</tspan><tspan x="1507.2982000000002" dy="16.900000000000002">→ Firestore filters</tspan></text>
+</g>
+<g class="node" data-id="API_IMG" data-label="/api/image-search
+GPT-4o Vision
+→ search phrase" data-shape="rectangle">
+  <rect x="1610.8877000000002" y="1704.1186666666663" width="147.913" height="70.7" rx="0" ry="0" fill="#172554" stroke="#60a5fa" stroke-width="0.75" />
+  <text x="1684.8442000000002" y="1739.4686666666662" text-anchor="middle" font-size="13" font-weight="500" fill="#bfdbfe"><tspan x="1684.8442000000002" dy="-12.350000000000001">/api/image-search</tspan><tspan x="1684.8442000000002" dy="16.900000000000002">GPT-4o Vision</tspan><tspan x="1684.8442000000002" dy="16.900000000000002">→ search phrase</tspan></text>
+</g>
+<g class="node" data-id="API_PROD" data-label="/api/products
+trending · collection
+· single · all" data-shape="rectangle">
+  <rect x="2181.315" y="1777.9186666666665" width="159.02800000000002" height="70.7" rx="0" ry="0" fill="#172554" stroke="#60a5fa" stroke-width="0.75" />
+  <text x="2260.829" y="1813.2686666666664" text-anchor="middle" font-size="13" font-weight="500" fill="#bfdbfe"><tspan x="2260.829" dy="-12.350000000000001">/api/products</tspan><tspan x="2260.829" dy="16.900000000000002">trending · collection</tspan><tspan x="2260.829" dy="16.900000000000002">· single · all</tspan></text>
+</g>
+<g class="node" data-id="GPT35" data-label="🤖 OpenAI GPT-3.5-Turbo
+Natural language → filters
+{hair_type, length, color}" data-shape="rectangle">
+  <rect x="878.2324999999996" y="2361.852" width="193.11399999999998" height="70.7" rx="0" ry="0" fill="#1a1a2e" stroke="#a78bfa" stroke-width="0.75" />
+  <text x="974.7894999999996" y="2397.2019999999998" text-anchor="middle" font-size="13" font-weight="500" fill="#e9d5ff"><tspan x="974.7894999999996" dy="-12.350000000000001">🤖 OpenAI GPT-3.5-Turbo</tspan><tspan x="974.7894999999996" dy="16.900000000000002">Natural language → filters</tspan><tspan x="974.7894999999996" dy="16.900000000000002">{hair_type, length, color}</tspan></text>
+</g>
+<g class="node" data-id="GPT4V" data-label="🤖 OpenAI GPT-4o-mini
+Vision — image → description" data-shape="rectangle">
+  <rect x="1091.3464999999997" y="2361.852" width="203.48799999999997" height="53.800000000000004" rx="0" ry="0" fill="#1a1a2e" stroke="#a78bfa" stroke-width="0.75" />
+  <text x="1193.0904999999996" y="2388.752" text-anchor="middle" font-size="13" font-weight="500" fill="#e9d5ff"><tspan x="1193.0904999999996" dy="-3.9000000000000012">🤖 OpenAI GPT-4o-mini</tspan><tspan x="1193.0904999999996" dy="16.900000000000002">Vision — image → description</tspan></text>
+</g>
+<g class="node" data-id="RESEND" data-label="📧 Resend Email
+Order Confirmation
+HTML template" data-shape="rectangle">
+  <rect x="1314.8344999999995" y="2361.852" width="152.359" height="70.7" rx="0" ry="0" fill="#1a1a2e" stroke="#a78bfa" stroke-width="0.75" />
+  <text x="1391.0139999999994" y="2397.2019999999998" text-anchor="middle" font-size="13" font-weight="500" fill="#e9d5ff"><tspan x="1391.0139999999994" dy="-12.350000000000001">📧 Resend Email</tspan><tspan x="1391.0139999999994" dy="16.900000000000002">Order Confirmation</tspan><tspan x="1391.0139999999994" dy="16.900000000000002">HTML template</tspan></text>
+</g>
+<g class="node" data-id="CLERK_SVC" data-label="🔑 Clerk SaaS
+JWT · Session · Org" data-shape="rectangle">
+  <rect x="1487.1934999999996" y="2361.852" width="165.697" height="53.800000000000004" rx="0" ry="0" fill="#1a1a2e" stroke="#a78bfa" stroke-width="0.75" />
+  <text x="1570.0419999999997" y="2388.752" text-anchor="middle" font-size="13" font-weight="500" fill="#e9d5ff"><tspan x="1570.0419999999997" dy="-3.9000000000000012">🔑 Clerk SaaS</tspan><tspan x="1570.0419999999997" dy="16.900000000000002">JWT · Session · Org</tspan></text>
+</g>
+<g class="node" data-id="PRODS" data-label="📦 products
+title · price · cost
+specifications · inventory
+metadata.views
+seo.handle" data-shape="cylinder">
+  <rect x="3466.7605833333328" y="2046.285333333333" width="191.63199999999998" height="104.50000000000001" fill="#052e16" stroke="none" />
+  <line x1="3466.7605833333328" y1="2046.285333333333" x2="3466.7605833333328" y2="2150.7853333333333" stroke="#4ade80" stroke-width="0.75" />
+  <line x1="3658.392583333333" y1="2046.285333333333" x2="3658.392583333333" y2="2150.7853333333333" stroke="#4ade80" stroke-width="0.75" />
+  <ellipse cx="3562.5765833333326" cy="2150.7853333333333" rx="95.81599999999999" ry="7" fill="#052e16" stroke="#4ade80" stroke-width="0.75" />
+  <ellipse cx="3562.5765833333326" cy="2046.285333333333" rx="95.81599999999999" ry="7" fill="#052e16" stroke="#4ade80" stroke-width="0.75" />
+  <text x="3562.5765833333326" y="2098.5353333333333" text-anchor="middle" font-size="13" font-weight="500" fill="#bbf7d0"><tspan x="3562.5765833333326" dy="-29.250000000000004">📦 products</tspan><tspan x="3562.5765833333326" dy="16.900000000000002">title · price · cost</tspan><tspan x="3562.5765833333326" dy="16.900000000000002">specifications · inventory</tspan><tspan x="3562.5765833333326" dy="16.900000000000002">metadata.views</tspan><tspan x="3562.5765833333326" dy="16.900000000000002">seo.handle</tspan></text>
+</g>
+<g class="node" data-id="ORDERS" data-label="🧾 orders
+items · total · status
+shippingAddress
+paymentMethod" data-shape="cylinder">
+  <rect x="3466.7605833333328" y="2289.485333333333" width="154.582" height="87.60000000000001" fill="#052e16" stroke="none" />
+  <line x1="3466.7605833333328" y1="2289.485333333333" x2="3466.7605833333328" y2="2377.085333333333" stroke="#4ade80" stroke-width="0.75" />
+  <line x1="3621.3425833333326" y1="2289.485333333333" x2="3621.3425833333326" y2="2377.085333333333" stroke="#4ade80" stroke-width="0.75" />
+  <ellipse cx="3544.051583333333" cy="2377.085333333333" rx="77.291" ry="7" fill="#052e16" stroke="#4ade80" stroke-width="0.75" />
+  <ellipse cx="3544.051583333333" cy="2289.485333333333" rx="77.291" ry="7" fill="#052e16" stroke="#4ade80" stroke-width="0.75" />
+  <text x="3544.051583333333" y="2333.2853333333333" text-anchor="middle" font-size="13" font-weight="500" fill="#bbf7d0"><tspan x="3544.051583333333" dy="-20.8">🧾 orders</tspan><tspan x="3544.051583333333" dy="16.900000000000002">items · total · status</tspan><tspan x="3544.051583333333" dy="16.900000000000002">shippingAddress</tspan><tspan x="3544.051583333333" dy="16.900000000000002">paymentMethod</tspan></text>
+</g>
+<g class="node" data-id="CARTS" data-label="🛒 carts
+per-user document
+items array" data-shape="cylinder">
+  <rect x="3678.392583333333" y="2046.285333333333" width="153.09999999999997" height="70.7" fill="#052e16" stroke="none" />
+  <line x1="3678.392583333333" y1="2046.285333333333" x2="3678.392583333333" y2="2116.985333333333" stroke="#4ade80" stroke-width="0.75" />
+  <line x1="3831.4925833333327" y1="2046.285333333333" x2="3831.4925833333327" y2="2116.985333333333" stroke="#4ade80" stroke-width="0.75" />
+  <ellipse cx="3754.942583333333" cy="2116.985333333333" rx="76.54999999999998" ry="7" fill="#052e16" stroke="#4ade80" stroke-width="0.75" />
+  <ellipse cx="3754.942583333333" cy="2046.285333333333" rx="76.54999999999998" ry="7" fill="#052e16" stroke="#4ade80" stroke-width="0.75" />
+  <text x="3754.942583333333" y="2081.635333333333" text-anchor="middle" font-size="13" font-weight="500" fill="#bbf7d0"><tspan x="3754.942583333333" dy="-12.350000000000001">🛒 carts</tspan><tspan x="3754.942583333333" dy="16.900000000000002">per-user document</tspan><tspan x="3754.942583333333" dy="16.900000000000002">items array</tspan></text>
+</g>
+<g class="node" data-id="WISHLISTS" data-label="❤️ wishlists
+per-user document
+items: productId[]" data-shape="cylinder">
+  <rect x="3466.7605833333328" y="2411.085333333333" width="153.09999999999997" height="70.7" fill="#052e16" stroke="none" />
+  <line x1="3466.7605833333328" y1="2411.085333333333" x2="3466.7605833333328" y2="2481.785333333333" stroke="#4ade80" stroke-width="0.75" />
+  <line x1="3619.8605833333327" y1="2411.085333333333" x2="3619.8605833333327" y2="2481.785333333333" stroke="#4ade80" stroke-width="0.75" />
+  <ellipse cx="3543.310583333333" cy="2481.785333333333" rx="76.54999999999998" ry="7" fill="#052e16" stroke="#4ade80" stroke-width="0.75" />
+  <ellipse cx="3543.310583333333" cy="2411.085333333333" rx="76.54999999999998" ry="7" fill="#052e16" stroke="#4ade80" stroke-width="0.75" />
+  <text x="3543.310583333333" y="2446.435333333333" text-anchor="middle" font-size="13" font-weight="500" fill="#bbf7d0"><tspan x="3543.310583333333" dy="-12.350000000000001">❤️ wishlists</tspan><tspan x="3543.310583333333" dy="16.900000000000002">per-user document</tspan><tspan x="3543.310583333333" dy="16.900000000000002">items: productId[]</tspan></text>
+</g>
+<g class="node" data-id="LOGS" data-label="📊 searchLogs
+query · filters
+resultsCount · userId" data-shape="cylinder">
+  <rect x="3466.7605833333328" y="2184.7853333333333" width="167.92000000000002" height="70.7" fill="#052e16" stroke="none" />
+  <line x1="3466.7605833333328" y1="2184.7853333333333" x2="3466.7605833333328" y2="2255.485333333333" stroke="#4ade80" stroke-width="0.75" />
+  <line x1="3634.680583333333" y1="2184.7853333333333" x2="3634.680583333333" y2="2255.485333333333" stroke="#4ade80" stroke-width="0.75" />
+  <ellipse cx="3550.720583333333" cy="2255.485333333333" rx="83.96000000000001" ry="7" fill="#052e16" stroke="#4ade80" stroke-width="0.75" />
+  <ellipse cx="3550.720583333333" cy="2184.7853333333333" rx="83.96000000000001" ry="7" fill="#052e16" stroke="#4ade80" stroke-width="0.75" />
+  <text x="3550.720583333333" y="2220.135333333333" text-anchor="middle" font-size="13" font-weight="500" fill="#bbf7d0"><tspan x="3550.720583333333" dy="-12.350000000000001">📊 searchLogs</tspan><tspan x="3550.720583333333" dy="16.900000000000002">query · filters</tspan><tspan x="3550.720583333333" dy="16.900000000000002">resultsCount · userId</tspan></text>
+</g>
+</svg>
+  </div>
+  <footer>Generated with beautiful-mermaid · AJ Hair ZA E-Commerce Platform</footer>
+</body>
+</html>
