@@ -1,35 +1,22 @@
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { getAdminDb } from "@/lib/firebase/admin";
-import { getProducts } from "@/lib/firebase/firestore";
+import { getProduct, getProducts } from "@/lib/firebase/firestore";
 import { GridTileImage } from "components/grid/tile";
 import Footer from "components/layout/footer";
 import { Gallery } from "components/product/gallery";
 import { ProductDescription } from "components/product/product-description";
 import { FieldValue } from "firebase-admin/firestore";
 import type { Product } from "lib/types";
-import { baseUrl } from "lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-const API_BASE = `${baseUrl()}`;
-
-async function fetchProduct(handle: string) {
-  const res = await fetch(
-    `${API_BASE}/api/products?action=product&handle=${handle}`,
-    { cache: "no-store" },
-  );
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.product;
-}
-
 export async function generateMetadata(props: {
   params: Promise<{ handle: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
-  const product = await fetchProduct(params.handle);
+  const product = await getProduct(params.handle);
 
   if (!product) return notFound();
 
@@ -66,7 +53,7 @@ export default async function ProductPage(props: {
   params: Promise<{ handle: string }>;
 }) {
   const params = await props.params;
-  const product = await fetchProduct(params.handle);
+  const product = await getProduct(params.handle);
 
   if (!product) return notFound();
 
