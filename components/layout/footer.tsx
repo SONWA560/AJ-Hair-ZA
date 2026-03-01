@@ -54,7 +54,7 @@ export default async function Footer() {
               href="https://sonwabisegcolotela.info"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-black dark:text-white"
+              className="text-black underline underline-offset-2 transition-opacity hover:opacity-70 dark:text-white"
             >
               Created by Sonwabise Gcolotela
             </a>

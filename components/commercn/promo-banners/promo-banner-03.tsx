@@ -1,17 +1,17 @@
 "use client"
 
-import { ArrowRight, X, Timer } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { ArrowRight, Timer, X } from "lucide-react"
 import { useState } from "react"
 
 const promoBannerData = {
   icon: Timer,
   message: "Flash Sale Ends Today",
-  description: "Free shipping on all orders over $50",
-  link: "/sale",
+  description: "Free shipping on all orders over R500",
+  link: "/search",
   linkText: "Shop Now",
-  backgroundColor: "bg-destructive",
+  backgroundColor: "bg-black",
   textColor: "text-white",
   isDismissible: true,
 }
