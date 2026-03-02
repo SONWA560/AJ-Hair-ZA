@@ -1,14 +1,14 @@
-import { CartProvider } from "components/cart/cart-context";
+import {
+    ClerkProvider,
+} from "@clerk/nextjs";
+import { Analytics } from "@vercel/analytics/next";
 import { AuthenticatedCartProvider } from "components/cart/authenticated-cart-provider";
 import { Navbar } from "components/layout/navbar";
 import { GeistSans } from "geist/font/sans";
-import { baseUrl } from "lib/utils";
 import type { Cart } from "lib/types";
+import { baseUrl } from "lib/utils";
 import { ReactNode } from "react";
 import { Toaster } from "sonner";
-import {
-  ClerkProvider,
-} from "@clerk/nextjs";
 import "./globals.css";
 
 const { SITE_NAME } = process.env;
@@ -47,6 +47,7 @@ export default async function RootLayout({
               <Toaster closeButton />
             </main>
           </AuthenticatedCartProvider>
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>

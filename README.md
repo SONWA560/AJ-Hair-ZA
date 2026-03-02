@@ -1,5 +1,7 @@
 # AJ Hair ZA
 
+Link to web url: <https://aj-hair-za.vercel.app>
+
 A full-featured e-commerce platform for AJ Hair ZA, built with Next.js 15 App Router and Firebase.
 
 ## Tech Stack
@@ -9,7 +11,7 @@ A full-featured e-commerce platform for AJ Hair ZA, built with Next.js 15 App Ro
 - **Auth:** Clerk v6
 - **Storage:** Firebase Storage
 - **AI Search:** OpenAI GPT-3.5 Turbo (text) + GPT-4o-mini Vision (image)
-- **Email:** Nodemailer
+- **Email:** Resend
 - **UI:** Tailwind CSS + shadcn/ui
 - **Payments:** Simulated (Card, EFT, Cash on Delivery, PayPal)
 
