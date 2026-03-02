@@ -11,15 +11,25 @@ export default async function AdminLayout({
   if (!userId) redirect("/admin/unauthorized");
 
   const client = await clerkClient();
-  const memberships = await client.users.getOrganizationMembershipList({
-    userId,
-  });
+  const [memberships, user] = await Promise.all([
+    client.users.getOrganizationMembershipList({ userId }),
+    client.users.getUser(userId),
+  ]);
 
   const isOrgMember = memberships.data.some(
     (m) => m.organization.id === process.env.ADMIN_ORG_ID,
   );
 
-  if (!isOrgMember) {
+  const adminEmails = (process.env.ADMIN_EMAILS ?? process.env.ADMIN_EMAIL ?? "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+
+  const isAdminEmail = user.emailAddresses.some((e) =>
+    adminEmails.includes(e.emailAddress.toLowerCase()),
+  );
+
+  if (!isOrgMember && !isAdminEmail) {
     redirect("/admin/unauthorized");
   }
 
